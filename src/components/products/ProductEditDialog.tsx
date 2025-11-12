@@ -105,6 +105,7 @@ function ProductEditDialog({
     const handleEditSubmit = async (values: any) => {
         setSubmitting(true);
 
+        // Convertir valores antes de enviar el formulario
         values.area = areaStringToEnum(values.area);
         values.unitOfMeasure = unitOfMeasureStringToEnum(values.unitOfMeasure);
 
