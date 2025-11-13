@@ -58,6 +58,7 @@ function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmittin
             const cleanedValues: any = {
                 name: values.name,
                 description: values.description,
+                imageFile: values.imageFile,
                 price: values.price,
                 isActive: values.isActive,
                 area: areaStringToEnum(values.area),
@@ -68,8 +69,8 @@ function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmittin
             };
 
             // Campos opcionales
-            if (values.imageUrl && values.imageUrl.trim() !== "") {
-                cleanedValues.imageUrl = values.imageUrl;
+            if (values.imageFile && values.imageFile[0]) {
+                cleanedValues.imageFile = values.imageFile[0];
             }
 
             if (values.hasStock && values.stockQuantity !== undefined && values.stockQuantity !== null) {
@@ -85,7 +86,9 @@ function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmittin
             }
             
             console.log("Valores limpiados para enviar:", cleanedValues);
+
             await onSubmit(cleanedValues);
+            
             onClose();
             reset();
         } catch (error) {

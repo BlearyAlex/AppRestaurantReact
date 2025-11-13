@@ -41,13 +41,13 @@ const unitOfMeasureStringToEnum = (unit: "unit" | "gram" | "milliliter"): number
     }
 }
 
-function ProductEditDialog({ 
-    open, 
-    onClose, 
-    onSubmit, 
-    submitting, 
-    setSubmitting, 
-    productToEdit 
+function ProductEditDialog({
+    open,
+    onClose,
+    onSubmit,
+    submitting,
+    setSubmitting,
+    productToEdit
 }: {
     open: boolean;
     onClose: () => void;
@@ -108,6 +108,16 @@ function ProductEditDialog({
         // Convertir valores antes de enviar el formulario
         values.area = areaStringToEnum(values.area);
         values.unitOfMeasure = unitOfMeasureStringToEnum(values.unitOfMeasure);
+
+        // --- Lógica para deleteImage ---
+        // Si se selecciona nueva imagen (imageFile tiene archivo), mandamos deleteImage = true
+        values.deleteImage = !!(values.imageFile && values.imageFile[0]);
+        // Si tienes que enviar solo el archivo, extrae el primer valor:
+        if (values.imageFile && values.imageFile[0]) {
+            values.imageFile = values.imageFile[0];
+        } else {
+            values.imageFile = undefined;
+        }
 
         await onSubmit(values);
         setSubmitting(false);

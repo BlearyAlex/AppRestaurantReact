@@ -76,7 +76,6 @@ function TablesCard() {
                                     </CardHeader>
                                     <CardContent className='flex flex-col items-center justify-center'>
                                         <HandPlatter className={`${table.isOccupied ? 'text-red-500' : 'text-green-500'}`} />
-
                                         <p className={`text-sm mb-4 font-semibold ${table.isOccupied ? 'text-red-500' : 'text-green-500'}`}>
                                             {table.isOccupied ? 'Mesa Ocupada' : 'Mesa Disponible'}
                                         </p>
@@ -113,12 +112,12 @@ function TablesCard() {
             />
 
             <TableDeleteDialog
-                  open={deleteModal.open}
-                  onClose={deleteModal.closeModal}
-                  onConfirm={deleteTable}
-                  submitting={submitting}
-                  setSubmitting={setSubmitting}
-                  tableToDelete={tableToDelete}
+                open={deleteModal.open}
+                onClose={deleteModal.closeModal}
+                onConfirm={deleteTable}
+                submitting={submitting}
+                setSubmitting={setSubmitting}
+                tableToDelete={tableToDelete}
             />
         </>
     )

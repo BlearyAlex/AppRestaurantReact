@@ -51,6 +51,18 @@ function ProductForm({
         <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-2 gap-4">
                 <div>
+                    <div>
+                        <Label htmlFor='imageFile'>Imagen</Label>
+                        <Input
+                            id='imageFile'
+                            type='file'
+                            accept='image/*'
+                            {...register("imageFile")}
+                        />
+                        {errors.imageFile && (
+                            <span className="text-xs text-red-500">{errors.imageFile.message}</span>
+                        )}
+                    </div>
                     <div className="grid gap-4 mb-4">
                         <Label htmlFor="name">Nombre</Label>
                         <Input id="name" {...register("name")} />

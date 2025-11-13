@@ -1,7 +1,7 @@
 export interface CreateProductDto {
     name: string;
     description?: string;
-    imageUrl?: string;
+    imageFile?: File;
     price: number;
     isActive: boolean;
     area: AreaEnum;
