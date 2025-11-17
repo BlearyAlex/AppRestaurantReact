@@ -6,11 +6,13 @@ import Home from './pages/Home'
 import Restaurants from './pages/Restaurants'
 import Categories from './pages/Categories'
 import Products from './pages/Products'
-import Orders from './pages/Orders'
+import Tables from './pages/Tables'
 import { ThemeProvider } from './components/theme-provider'
 import ProtectedRoute from './utils/ProtectedRoute'
 import Login from './pages/Login'
 import { Toaster } from './components/ui/sonner'
+import Delivery from './pages/Delivery'
+import Counter from './pages/Counter'
 
 function App() {
   return (
@@ -31,7 +33,9 @@ function App() {
           <Route path="restaurants" element={<Restaurants />} />
           <Route path="categories" element={<Categories />} />
           <Route path="products" element={<Products />} />
-          <Route path="orders" element={<Orders />} />
+          <Route path="orders/tables" element={<Tables />} />
+          <Route path='orders/counter' element={<Counter />} />
+          <Route path='orders/delivery' element={<Delivery />} />
         </Route>
 
       </Routes>

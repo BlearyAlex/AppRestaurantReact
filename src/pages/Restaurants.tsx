@@ -21,8 +21,11 @@ function Restaurants() {
         const fetchRestaurants = async () => {
             try {
                 const response = await restaurantService.getRestaurantsForUser();
-                console.log(response.data)
                 setRestaurants(response.data);
+
+                if (response.data.length === 1 && !currentRestaurantId) {
+                    setSelectedRestaurant(response.data[0].restaurantId);
+                }
             } catch (error: any) {
                 setError(error.response?.data?.message || "Error al cargar restaurantes");
             } finally {
@@ -30,7 +33,7 @@ function Restaurants() {
             }
         };
         fetchRestaurants();
-    }, []);
+    }, [currentRestaurantId, setSelectedRestaurant]);
 
     const handleSelectRestaurant = (restaurantId: number) => {
         setSelectedRestaurant(restaurantId);
@@ -78,8 +81,8 @@ function Restaurants() {
                         <Card
                             key={restaurant.restaurantId}
                             className={`relative w-72 border transition-transform duration-300 ease-in-out transform hover:-translate-y-2 hover:scale-105 hover:shadow-xl ${isCurrentRestaurant(restaurant.restaurantId)
-                                    ? "border-green-500"
-                                    : "border-gray-200"
+                                ? "border-green-500"
+                                : "border-gray-200"
                                 }`}
                         >
                             {/* Indicador */}

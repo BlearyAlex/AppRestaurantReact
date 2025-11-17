@@ -10,17 +10,34 @@ type Actions = {
 };
 
 const areaEnumMapping: Record<number, string> = {
-    0: "Cocina", 
-    1: "Bar", 
+    0: "Cocina",
+    1: "Bar",
 };
 
 const unitOfMeasureEnumMapping: Record<number, string> = {
-    0: "Unidad (es)", 
+    0: "Unidad (es)",
     1: "Gramo (s)",
-    3: "Mililitro (s)" 
+    3: "Mililitro (s)"
 };
 
 export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<ProductResponse>[] => [
+    {
+        accessorKey: "imageUrl",
+        header: "Imagen",
+        cell: ({ row }) => {
+            const url = row.getValue("imageUrl") as string;
+            const finalUrl = url
+                ? `http://localhost:8080${url}`
+                : "/placeholder.png";
+
+            return (
+                <img
+                    src={finalUrl}
+                    alt="Producto"
+                    className="w-12 h-12 object-cover rounded-md border" />
+            )
+        }
+    },
     {
         accessorKey: "name",
         header: "Nombre",
@@ -28,7 +45,7 @@ export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Prod
     {
         accessorKey: "price",
         header: "Precio",
-        cell: ({row}) => {
+        cell: ({ row }) => {
             const priceValue = row.getValue("price") as number;
             const formttedPrice = new Intl.NumberFormat("es-Mx", {
                 style: "currency",
@@ -60,7 +77,7 @@ export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Prod
     {
         accessorKey: "unitOfMeasure",
         header: "Unidad de Medida",
-        cell: ({row}) => {
+        cell: ({ row }) => {
             const unitOfMeasureValue = row.getValue("unitOfMeasure") as number;
             const unitOfMeasureName = unitOfMeasureEnumMapping[unitOfMeasureValue] || "Desconocido";
             return (
@@ -82,7 +99,7 @@ export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Prod
         cell: ({ row }) => {
             const isActive = row.getValue("isActive");
             return (
-                <span   className={`font-semibold ${isActive ? "text-green-500" : "text-red-500"}`}>
+                <span className={`font-semibold ${isActive ? "text-green-500" : "text-red-500"}`}>
                     {isActive ? "Activo" : "Inactivo"}
                 </span>
             )

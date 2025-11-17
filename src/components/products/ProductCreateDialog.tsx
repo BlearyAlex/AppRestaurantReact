@@ -6,7 +6,7 @@ import { useEffect } from "react";
 
 function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmitting }: any) {
     const { selectedRestaurantId } = useAuthStore();
-    
+
     const { register, handleSubmit, setValue, reset, errors, watch } = useProductForm(false, {
         name: "",
         description: "",
@@ -50,10 +50,11 @@ function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmittin
     };
 
     const handleFormSubmit = async (values: any) => {
+        console.log("SUBMIT DEL FORMULARIO DE PRODUCTO:", values);
         try {
             setSubmitting(true);
             console.log("Valores del formulario:", values);
-            
+
             // Limpiar valores opcionales que no son necesarios y convertir enums
             const cleanedValues: any = {
                 name: values.name,
@@ -84,11 +85,11 @@ function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmittin
             if (values.categoryId && values.categoryId > 0) {
                 cleanedValues.categoryId = values.categoryId;
             }
-            
+
             console.log("Valores limpiados para enviar:", cleanedValues);
 
             await onSubmit(cleanedValues);
-            
+
             onClose();
             reset();
         } catch (error) {
@@ -100,7 +101,7 @@ function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmittin
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent  className="sm:max-w-[600px] md:max-w-[800px] lg:max-w-[1000px]">
+            <DialogContent className="sm:max-w-[600px] md:max-w-[800px] lg:max-w-[1000px]">
                 <DialogHeader>
                     <DialogTitle>Crear Producto</DialogTitle>
                     <DialogDescription>Crea un nuevo producto.</DialogDescription>

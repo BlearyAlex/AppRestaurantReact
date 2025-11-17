@@ -53,13 +53,27 @@ const data = {
     },
     {
       title: "Productos",
-      url: "/dashboard/products",
+      url: "products",
       icon: Hamburger,
     },
     {
       title: "Pedidos",
-      url: "/dashboard/orders",
+      url: "#",
       icon: NotebookPen,
+      items: [
+        {
+          title: "Mesas",
+          url: "/dashboard/orders/tables",
+        },
+        {
+          title: "Mostrador",
+          url: "/dashboard/orders/counter",
+        },
+        {
+          title: "Para llevar",
+          url: "/dashboard/orders/delivery",
+        },
+      ],
     },
   ],
   navClouds: [
