@@ -1,5 +1,5 @@
 export interface CreateOrderDto {
-    tableId: number;
+    tableId?: number;
     notes?: string;
     products: CreateOrderProductDto[];
 }
@@ -14,10 +14,10 @@ export interface OrderResponse {
     orderId: number;
     tableId: number;
     notes?: string;
-    createdAt: string; 
-    updatedAt: string; 
+    createdAt: string;
+    updatedAt: string;
     isOccupied: boolean;
-    products: OrderProductResponse[]; 
+    products: OrderProductResponse[];
 }
 
 export interface OrderProductResponse {

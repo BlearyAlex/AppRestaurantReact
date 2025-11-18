@@ -1,7 +1,7 @@
 import useModalState from '@/hooks/useModalState';
 import useTables from '@/hooks/useTables';
 import type { TableResponse } from '@/types/table';
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Spinner } from '../ui/spinner';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { HandPlatter } from 'lucide-react';
@@ -11,7 +11,7 @@ import TableCreateDialog from './TableCreateDialog';
 import TableEditDialog from './TableEditDialog';
 import TableDeleteDialog from './TableDeleteDialog';
 
-function TablesCard() {
+function TablesCard({ onSelectTable }: any) {
     const [submitting, setSubmitting] = useState(false);
     const [tableToEdit, setTableToEdit] = useState<TableResponse | null>(null);
     const [tableToDelete, setTableToDelete] = useState<TableResponse | null>(null);
