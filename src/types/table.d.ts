@@ -2,12 +2,15 @@ export interface TableResponse {
     tableId: number;
     name: string;
     isOccupied: boolean;
+    seats: number;
+    location: string;
     restaurantId: number;
 }
 
 export interface CreateTableDto {
     name: string;
-    isOccupied: boolean;
+    seats: number;
+    location: string;
     restaurantId: number;
 }
 

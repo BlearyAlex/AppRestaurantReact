@@ -1,4 +1,4 @@
-import TakeOrder from "@/components/TakeOrder"
+import TakeOrder from "@/components/orders/TakeOrder"
 
 function Delivery() {
     return (

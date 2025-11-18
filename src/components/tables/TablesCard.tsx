@@ -4,7 +4,7 @@ import type { TableResponse } from '@/types/table';
 import { useEffect, useState } from 'react'
 import { Spinner } from '../ui/spinner';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { HandPlatter } from 'lucide-react';
+import { Armchair, HandPlatter, MapPin } from 'lucide-react';
 import { Button } from '../ui/button';
 import { IconPlus } from '@tabler/icons-react';
 import TableCreateDialog from './TableCreateDialog';
@@ -76,9 +76,19 @@ function TablesCard({ onSelectTable }: any) {
                                     </CardHeader>
                                     <CardContent className='flex flex-col items-center justify-center'>
                                         <HandPlatter className={`${table.isOccupied ? 'text-red-500' : 'text-green-500'}`} />
-                                        <p className={`text-sm mb-4 font-semibold ${table.isOccupied ? 'text-red-500' : 'text-green-500'}`}>
+                                        <p className={`text-sm mb-2 font-semibold ${table.isOccupied ? 'text-red-500' : 'text-green-500'}`}>
                                             {table.isOccupied ? 'Mesa Ocupada' : 'Mesa Disponible'}
                                         </p>
+
+                                        <div className='flex gap-4'>
+                                            <p className='text-sm mb-4 font-semibold flex items-center gap-2'>
+                                                <Armchair size={20} className='text-primary' /> {table.seats}
+                                            </p>
+
+                                            <p className='text-sm mb-4 font-semibold flex items-center gap-2'>
+                                                <MapPin size={20} className='text-primary' /> {table.location}
+                                            </p>
+                                        </div>
 
                                         <div className='flex gap-4'>
                                             <Button onClick={() => handleEdit(table)} variant="outline" size="sm">Editar</Button>

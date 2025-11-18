@@ -25,6 +25,8 @@ function TableEditDialog({
     const { register, handleSubmit, setValue, reset, errors, watch } = useTableForm(true, {
         tableId: 0,
         name: "",
+        seats: 0,
+        location: "",
         restaurantId: selectedRestaurantId || 0,
     });
 
@@ -33,6 +35,8 @@ function TableEditDialog({
             reset({
                 tableId: tableToEdit.tableId,
                 name: tableToEdit.name,
+                seats: tableToEdit.seats,
+                location: tableToEdit.location,
                 restaurantId: tableToEdit.restaurantId || selectedRestaurantId || 0
             });
         }

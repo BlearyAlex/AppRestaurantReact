@@ -1,5 +1,5 @@
 import TablesCard from '@/components/tables/TablesCard'
-import TakeOrder from '@/components/TakeOrder';
+import TakeOrder from '@/components/orders/TakeOrder';
 import { useState } from 'react';
 
 function Tables() {
