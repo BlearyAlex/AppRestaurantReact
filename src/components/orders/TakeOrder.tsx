@@ -8,10 +8,20 @@ import { BadgeCheck, NotepadText, Send, ShoppingCart, Trash } from 'lucide-react
 import { useSelectedProducts } from '@/hooks/useSelectedProducts';
 import useModalState from '@/hooks/useModalState';
 import CurrentConsumptionModal from './CurrentConsumptionModal';
+import type { CreateOrderDto } from '@/types/order';
+import { OrderType } from '@/enums/orderEnum';
+import useOrder from '@/hooks/useOrder';
 
-function TakeOrder() {
+
+type TakeOrderProps = {
+    orderType: OrderType;
+    tableId?: number;
+}
+
+function TakeOrder({ orderType, tableId }: TakeOrderProps) {
     const { data: productsData, fetchProducts } = useProducts();
     const [selectedCategory, setSelectedCategory] = useState("all");
+    const [loading, setLoading] = useState<boolean>(false);
 
     const {
         selectedProducts,
@@ -25,6 +35,8 @@ function TakeOrder() {
     } = useSelectedProducts();
 
     const openModal = useModalState();
+
+    const { createOrder } = useOrder();
 
     useEffect(() => {
         if (productsData.length === 0) {
@@ -49,8 +61,31 @@ function TakeOrder() {
         );
     }, [selectedCategory, productsData]);
 
-    const handleSubmit = async () => {
-      console.log("Hiciste Click en el formulario")
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (selectedProducts.length === 0) return;
+        setLoading(true);
+        try {
+            const order: CreateOrderDto = {
+                orderType,
+                products: selectedProducts.map(item => ({
+                    productId: item.product.productId,
+                    quantity: item.quantity,
+                    unitPrice: item.product.price
+                })),
+            };
+
+            if (orderType === OrderType.ForTable && tableId)
+                order.tableId = tableId;
+
+            console.log(order)
+            await createOrder(order);
+            clearOrder();
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -199,8 +234,16 @@ function TakeOrder() {
 
                                 {/* Botones Formulario */}
                                 <div className="block space-y-2">
-                                    <Button type='submit' className="w-full bg-green-500 text-white hover:bg-green-400">
-                                        <Send /> Enviar a Cocina
+                                    <Button
+                                        type='submit'
+                                        className="w-full bg-green-500 text-white hover:bg-green-400"
+                                        disabled={selectedProducts.length === 0 || loading}
+                                    >
+                                        {loading ? (
+                                            'Enviando...'
+                                        ) : orderType === OrderType.ForTable
+                                            ? (<><Send /> Enviar a Cocina</>)
+                                            : (<><Send /> Proseguir</>)}
                                     </Button>
                                     <Button
                                         onClick={() => clearOrder(filteredProducts)}

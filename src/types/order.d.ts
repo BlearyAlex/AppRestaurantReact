@@ -15,12 +15,6 @@ export interface CreateOrderProductDto {
     unitPrice: number;
 }
 
-export enum OrderType {
-    ForTable = 1,
-    ForTakeAway = 2,
-    ForCounter = 3,
-}
-
 export interface OrderResponse {
     orderId: number;
     tableId: number;
