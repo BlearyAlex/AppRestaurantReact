@@ -1,9 +1,9 @@
-import type { CreateTableDto, UpdateTableDto, DeleteTableDto, TableResponse } from "@/types/table";
+import type { CreateTableDto, UpdateTableDto, TableResponse } from "@/types/table";
 import api from "./api";
 import type { ApiResponse } from "@/types/api";
 
 class TableService {
-    async create(payload: CreateTableDto): Promise<TableResponse> {
+    async create(payload: CreateTableDto): Promise<ApiResponse<TableResponse>> {
         try {
             const response = await api.post("Table/create", payload)
             return response.data
@@ -12,7 +12,7 @@ class TableService {
         }
     }
 
-    async update(payload: UpdateTableDto): Promise<TableResponse> {
+    async update(payload: UpdateTableDto): Promise<ApiResponse<TableResponse>> {
         try {
             const response = await api.put("Table/update", payload)
             return response.data;
