@@ -1,6 +1,5 @@
 export interface CreateOrderDto {
     tableId?: number;
-    notes?: string;
     orderType: OrderType;
     deliveryAddress?: string | null;
     estimatedDeliveryTime?: Date | null;
@@ -13,12 +12,12 @@ export interface CreateOrderProductDto {
     productId: number;
     quantity: number;
     unitPrice: number;
+    notes?: string;
 }
 
 export interface OrderResponse {
     orderId: number;
     tableId: number;
-    notes?: string;
     createdAt: string;
     updatedAt: string;
     isOccupied: boolean;
@@ -29,4 +28,5 @@ export interface OrderProductResponse {
     productId: number;
     quantity: number;
     unitPrice: number;
+    notes?: string;
 }

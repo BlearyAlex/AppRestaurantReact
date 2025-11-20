@@ -11,14 +11,21 @@ import CurrentConsumptionModal from './CurrentConsumptionModal';
 import type { CreateOrderDto } from '@/types/order';
 import { OrderType } from '@/enums/orderEnum';
 import useOrder from '@/hooks/useOrder';
+import { useOrderStore } from '@/store/orderStore';
 
 
-type TakeOrderProps = {
-    orderType: OrderType;
-    tableId?: number;
-}
+function TakeOrder({ orderType }: {orderType: OrderType}) {
+    const tableId = useOrderStore((state) => state.tableId);
 
-function TakeOrder({ orderType, tableId }: TakeOrderProps) {
+    if (orderType === OrderType.ForTable && !tableId) {
+        return (
+          <div className="p-10 text-center">
+            No hay mesa seleccionada.<br />
+            <a href="/dashboard/orders/tables" className="text-blue-500 underline">Volver a Mesas</a>
+          </div>
+        );
+    }
+
     const { data: productsData, fetchProducts } = useProducts();
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [loading, setLoading] = useState<boolean>(false);
@@ -71,7 +78,8 @@ function TakeOrder({ orderType, tableId }: TakeOrderProps) {
                 products: selectedProducts.map(item => ({
                     productId: item.product.productId,
                     quantity: item.quantity,
-                    unitPrice: item.product.price
+                    unitPrice: item.product.price,
+                    notes: item.product.notes,
                 })),
             };
 

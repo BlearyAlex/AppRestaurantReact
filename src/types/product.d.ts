@@ -27,6 +27,7 @@ export interface ProductResponse {
     name: string;
     description?: string;
     imageUrl?: string;
+    notes?: string;
     price: number;
     isActive: boolean;
     area: AreaEnum;

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 export type SelectedProduct = {
     product: ProductResponse;
     quantity: number;
+    notes?: string;
 };
 
 export function useSelectedProducts() {
