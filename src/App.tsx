@@ -14,6 +14,7 @@ import { Toaster } from './components/ui/sonner'
 import Delivery from './pages/Delivery'
 import Counter from './pages/Counter'
 import Orders from './pages/Orders'
+import ViewAccount from './pages/ViewAccount'
 
 function App() {
   return (
@@ -37,7 +38,8 @@ function App() {
           <Route path="orders/tables" element={<Tables />} />
           <Route path='orders/counter' element={<Counter />} />
           <Route path='orders/delivery' element={<Delivery />} />
-          <Route path='orders/takeOrder' element={<Orders />}/>
+          <Route path='orders/takeOrder' element={<Orders />} />
+          <Route path='orders/viewAccount' element={<ViewAccount />} />
         </Route>
 
       </Routes>

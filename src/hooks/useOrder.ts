@@ -1,5 +1,5 @@
 import OrderService from "@/api/orderService";
-import type { OrderResponse } from "@/types/order"
+import type { OrderResponse, UpdateProductQuantityDto } from "@/types/order"
 import { useState } from "react"
 import { toast } from "sonner";
 
@@ -22,11 +22,40 @@ const useOrder = () => {
         }
     }
 
+    const getTableOrders = async (tableId: number) => {
+        try {
+            setLoading(true);
+            const orders = await orderService.getTableOrders(tableId);
+            setData(orders.data);
+            setLoading(false);
+        } catch (error) {
+            setError(`No se pudo obtener las ordenes. ${error}`)
+            setLoading(false);
+        }
+    }
+
+    const updateProductQuantities = async (payload: UpdateProductQuantityDto) => {
+        try {
+            await toast.promise(orderService.updateProductQuantities(payload), {
+                loading: "Actualizando cantidades...",
+                success: (response) => {
+                    setData(response.data);
+                    return "Cantidades actualizadas correctamente.";
+                },
+                error: "Error al actualizar las cantidades.",
+            });
+        } catch (error) {
+            setError(`No se pudo actualizar las cantidades. ${error}`)
+        }
+    }
+
     return {
         data,
         loading,
         error,
-        createOrder
+        createOrder,
+        getTableOrders,
+        updateProductQuantities
     }
 };
 

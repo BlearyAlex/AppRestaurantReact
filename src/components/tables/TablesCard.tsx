@@ -10,13 +10,14 @@ import { IconPlus } from '@tabler/icons-react';
 import TableCreateDialog from './TableCreateDialog';
 import TableEditDialog from './TableEditDialog';
 import TableDeleteDialog from './TableDeleteDialog';
-import { useNavigate } from 'react-router';
 import { useOrderStore } from '@/store/orderStore';
+import TableActionsModal from './TableActionsModal';
 
 function TablesCard() {
     const [submitting, setSubmitting] = useState(false);
     const [tableToEdit, setTableToEdit] = useState<TableResponse | null>(null);
     const [tableToDelete, setTableToDelete] = useState<TableResponse | null>(null);
+    const [selectedTable, setSelectedTable] = useState<TableResponse | null>(null);
 
     const {
         data,
@@ -31,8 +32,7 @@ function TablesCard() {
     const createModal = useModalState();
     const editModal = useModalState();
     const deleteModal = useModalState();
-
-    const navigate = useNavigate();
+    const actionsModal = useModalState();
 
     const setTableId = useOrderStore((s) => s.setTableId);
 
@@ -60,9 +60,10 @@ function TablesCard() {
         deleteModal.openModal();
     };
 
-    const handleOrder = (table: TableResponse) => {
+    const handleTableClick = (table: TableResponse) => {
         setTableId(table.tableId);
-        navigate('/dashboard/orders/takeOrder');
+        setSelectedTable(table);
+        actionsModal.openModal();
     }
 
     return (
@@ -88,7 +89,9 @@ function TablesCard() {
                                     <CardContent className='flex flex-col items-center justify-center'>
 
 
-                                        <HandPlatter className={`hover:cursor-pointer ${table.isOccupied ? 'text-red-500' : 'text-green-500'}`} onClick={() => handleOrder(table)} />
+                                        <HandPlatter
+                                            className={`hover:cursor-pointer ${table.isOccupied ? 'text-red-500' : 'text-green-500'}`}
+                                            onClick={() => handleTableClick(table)} />
 
                                         <p className={`text-sm mb-2 font-semibold ${table.isOccupied ? 'text-red-500' : 'text-green-500'}`}>
                                             {table.isOccupied ? 'Mesa Ocupada' : 'Mesa Disponible'}
@@ -142,6 +145,14 @@ function TablesCard() {
                 submitting={submitting}
                 setSubmitting={setSubmitting}
                 tableToDelete={tableToDelete}
+            />
+
+            <TableActionsModal
+                open={actionsModal.open}
+                onClose={actionsModal.closeModal}
+                tableId={selectedTable?.tableId ?? 0}
+                tableName={selectedTable?.name ?? ''}
+                tableStatus={selectedTable?.isOccupied ? 'occupied' : 'available'}
             />
         </>
     )

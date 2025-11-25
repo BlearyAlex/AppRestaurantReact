@@ -26,7 +26,26 @@ export interface OrderResponse {
 
 export interface OrderProductResponse {
     productId: number;
+    imageUrl: string;
+    productName: string;
     quantity: number;
     unitPrice: number;
     notes?: string;
+    totalPrice: number;
+}
+
+// DTOs para actualizar cantidades - coinciden con backend
+export interface ProductUpdate {
+    productId: number;
+    newQuantity: number;
+}
+
+export interface OrderProductUpdate {
+    orderId: number;
+    productUpdates: ProductUpdate[];
+}
+
+export interface UpdateProductQuantityDto {
+    tableId: number;
+    ordersToUpdate: OrderProductUpdate[];
 }
