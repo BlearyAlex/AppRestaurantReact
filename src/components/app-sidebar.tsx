@@ -27,7 +27,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Hamburger, LayoutList, NotebookPen, Utensils } from "lucide-react"
+import { Hamburger, LayoutList, NotebookPen, Utensils, Motorbike, Dock, Sofa, CookingPot } from "lucide-react"
 
 const data = {
   user: {
@@ -64,16 +64,24 @@ const data = {
         {
           title: "Mesas",
           url: "/dashboard/orders/tables",
+          icon: Sofa
         },
         {
           title: "Mostrador",
           url: "/dashboard/orders/counter",
+          icon: Dock
         },
         {
           title: "Para llevar",
           url: "/dashboard/orders/delivery",
+          icon: Motorbike
         },
       ],
+    },
+    {
+      title: "Cocina",
+      url: "#",
+      icon: CookingPot
     },
   ],
   navClouds: [

@@ -23,7 +23,7 @@ export function NavMain({
     title: string
     url: string
     icon?: React.ComponentType<any>
-    items?: { title: string; url: string }[]
+    items?: { title: string; url: string; icon?: React.ComponentType<any> }[]
   }[]
 }) {
   const location = useLocation()
@@ -103,7 +103,10 @@ export function NavMain({
                                 isActive={location.pathname === sub.url}
                                 size="md"
                               >
-                                <Link to={sub.url}>{sub.title}</Link>
+                                <Link to={sub.url}>
+                                  {sub.icon && <sub.icon />}
+                                  <span>{sub.title}</span>
+                                </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
                           ))}

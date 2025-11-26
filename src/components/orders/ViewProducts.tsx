@@ -133,8 +133,10 @@ function ViewProducts({ onClose }: ViewAccountProps) {
 
     if (error) {
         return (
-            <div className="p-10 text-center">
-                <p className="text-red-500">{error}</p>
+            <div className="p-6">
+                <div className="bg-card text-card-foreground p-6 rounded-lg border">
+                    <p className='text-center'>No se encontraron ordenes para esta mesa.</p>
+                </div>
             </div>
         );
     }
