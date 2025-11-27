@@ -17,11 +17,16 @@ export interface CreateOrderProductDto {
 
 export interface OrderResponse {
     orderId: number;
-    tableId: number;
     createdAt: string;
     updatedAt: string;
+    orderType: OrderType;
+    ticketNumber: string;
+    counterNumber: number;
+    deliveryAddress: string;
+    estimatedDeliveryTime: string;
     isOccupied: boolean;
     products: OrderProductResponse[];
+    table: TableProductResponse;
 }
 
 export interface OrderProductResponse {
@@ -32,6 +37,12 @@ export interface OrderProductResponse {
     unitPrice: number;
     notes?: string;
     totalPrice: number;
+}
+
+export interface TableProductResponse {
+    tableId: number;
+    name: number;
+    location: string;
 }
 
 // DTOs para actualizar cantidades - coinciden con backend

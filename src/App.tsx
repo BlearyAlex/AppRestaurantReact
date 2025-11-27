@@ -15,6 +15,7 @@ import Delivery from './pages/Delivery'
 import Counter from './pages/Counter'
 import Orders from './pages/Orders'
 import ViewAccount from './pages/ViewAccount'
+import Kitchen from './pages/Kitchen'
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
           <Route path='orders/delivery' element={<Delivery />} />
           <Route path='orders/takeOrder' element={<Orders />} />
           <Route path='orders/viewAccount' element={<ViewAccount />} />
+          <Route path='orders/kitchen' element={<Kitchen />} />
         </Route>
 
       </Routes>

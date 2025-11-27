@@ -80,7 +80,7 @@ const data = {
     },
     {
       title: "Cocina",
-      url: "#",
+      url: "/dashboard/orders/kitchen",
       icon: CookingPot
     },
   ],
