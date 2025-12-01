@@ -1,4 +1,5 @@
 import OrderService from "@/api/orderService";
+import type { OrderStatus } from "@/enums/orderEnum";
 import type { OrderResponse, UpdateProductQuantityDto } from "@/types/order"
 import { useState } from "react"
 import { toast } from "sonner";
@@ -49,13 +50,26 @@ const useOrder = () => {
         }
     }
 
+    const updateOrderStatus = async (orderId: number, newStatus: OrderStatus) => {
+        try {
+            await toast.promise(orderService.updateOrderStatus(orderId, newStatus), {
+                loading: "Actualizando estado...",
+                success: "Estado actualizado correctamente.",
+                error: "Error al actualizar el estado.",
+            });
+        } catch (error) {
+            setError(`No se pudo actualizar el estado. ${error}`)
+        }
+    }
+
     return {
         data,
         loading,
         error,
         createOrder,
         getTableOrders,
-        updateProductQuantities
+        updateProductQuantities,
+        updateOrderStatus
     }
 };
 

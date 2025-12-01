@@ -1,6 +1,7 @@
 import type { CreateOrderDto, OrderResponse, UpdateProductQuantityDto } from "@/types/order";
 import api from "./api";
 import type { ApiResponse } from "@/types/api";
+import type { OrderStatus } from "@/enums/orderEnum";
 
 class OrderService {
     async create(payload: CreateOrderDto): Promise<OrderResponse> {
@@ -24,6 +25,15 @@ class OrderService {
     async updateProductQuantities(payload: UpdateProductQuantityDto): Promise<ApiResponse<OrderResponse[]>> {
         try {
             const response = await api.patch(`Order/updateQuantities`, payload)
+            return response.data
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async updateOrderStatus(orderId: number, newStatus: OrderStatus): Promise<ApiResponse<OrderResponse[]>> {
+        try {
+            const response = await api.put(`Order/${orderId}/status`, { status: newStatus })
             return response.data
         } catch (error) {
             throw error
