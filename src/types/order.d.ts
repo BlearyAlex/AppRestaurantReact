@@ -20,6 +20,7 @@ export interface OrderResponse {
     createdAt: string;
     updatedAt: string;
     orderType: OrderType;
+    KitchenStatus: OrderStatus;
     ticketNumber: string;
     counterNumber: number;
     deliveryAddress: string;

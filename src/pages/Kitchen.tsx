@@ -1,6 +1,17 @@
-import CardOrderKitchen from "@/components/orders/CardOrderKitchen"
+import KanbanBoard from "@/components/kanban/KanbanBoard"
+import { playNewOrderSound } from "@/helpers/soundHelper";
+import useSignalR from "@/hooks/useSignalR";
+import { useKitchenOrdersStore } from "@/store/kitchenOrderStore";
+import type { OrderResponse } from "@/types/order";
 
 function Kitchen() {
+    const addOrder = useKitchenOrdersStore((state) => state.addOrder);
+
+    useSignalR("http://localhost:8080/orderHub", (order: OrderResponse) => {
+        addOrder(order);
+        playNewOrderSound();
+    });
+
     return (
         <div className="px-4 lg:px-6">
             <div className="flex justify-between items-center mb-5">
@@ -11,7 +22,7 @@ function Kitchen() {
                     </h1>
                 </div>
             </div>
-            <CardOrderKitchen />
+            <KanbanBoard />
         </div>
     )
 }
