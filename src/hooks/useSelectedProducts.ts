@@ -77,6 +77,16 @@ export function useSelectedProducts() {
         }
     };
 
+    const updateNotes = (productId: number, notes: string) => {
+        setSelectedProducts(prev =>
+            prev.map(p =>
+                p.product.productId === productId
+                    ? { ...p, notes }
+                    : p
+            )
+        );
+    };
+
     return {
         selectedProducts,
         addProduct,
@@ -84,6 +94,7 @@ export function useSelectedProducts() {
         decreaseQuantity,
         removeProduct,
         clearOrder,
+        updateNotes,
         totalProducts,
         totalPrice
     };

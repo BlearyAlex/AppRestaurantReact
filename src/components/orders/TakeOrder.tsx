@@ -14,15 +14,15 @@ import useOrder from '@/hooks/useOrder';
 import { useOrderStore } from '@/store/orderStore';
 
 
-function TakeOrder({ orderType }: {orderType: OrderType}) {
+function TakeOrder({ orderType }: { orderType: OrderType }) {
     const tableId = useOrderStore((state) => state.tableId);
 
     if (orderType === OrderType.ForTable && !tableId) {
         return (
-          <div className="p-10 text-center">
-            No hay mesa seleccionada.<br />
-            <a href="/dashboard/orders/tables" className="text-blue-500 underline">Volver a Mesas</a>
-          </div>
+            <div className="p-10 text-center">
+                No hay mesa seleccionada.<br />
+                <a href="/dashboard/orders/tables" className="text-blue-500 underline">Volver a Mesas</a>
+            </div>
         );
     }
 
@@ -37,6 +37,7 @@ function TakeOrder({ orderType }: {orderType: OrderType}) {
         decreaseQuantity,
         removeProduct,
         clearOrder,
+        updateNotes,
         totalProducts,
         totalPrice,
     } = useSelectedProducts();
@@ -79,7 +80,7 @@ function TakeOrder({ orderType }: {orderType: OrderType}) {
                     productId: item.product.productId,
                     quantity: item.quantity,
                     unitPrice: item.product.price,
-                    notes: item.product.notes,
+                    notes: item.notes,
                 })),
             };
 
@@ -175,55 +176,70 @@ function TakeOrder({ orderType }: {orderType: OrderType}) {
 
                                 {/* Tarjeta de Productos Seleccionados */}
                                 <div
-                                    className={`space-y-6 ${selectedProducts.length >= 3 ? 'max-h-[400px] overflow-y-scroll' : ''
+                                    className={`space-y-6 ${selectedProducts.length >= 2 ? 'max-h-[400px] overflow-y-scroll' : ''
                                         }`}
                                 >
                                     {selectedProducts.map((item) => (
                                         <div
                                             key={item.product.productId}
-                                            className="pb-4 flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow-lg"
+                                            className="pb-4 flex flex-col bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow-lg"
                                         >
-                                            {/* Barra de color en el contorno izquierdo */}
-                                            <div className="w-4 h-full bg-primary rounded-l-xl" />
+                                            <div className="flex items-center justify-between">
+                                                {/* Barra de color en el contorno izquierdo */}
+                                                <div className="w-4 h-full bg-primary rounded-l-xl" />
 
-                                            <div className="flex flex-col justify-center flex-1">
-                                                <h3 className="font-semibold">{item.product.name}</h3>
-                                                <p className="flex items-center gap-1">
-                                                    <BadgeCheck size={14} strokeWidth={3} color="#fcc800" />{' '}
-                                                    {item.product.category.name}
-                                                </p>
-                                            </div>
-
-                                            {/* Controles de cantidad + eliminar */}
-                                            <div className="flex gap-1 items-center">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="text-md font-semibold text-primary">
-                                                        {new Intl.NumberFormat('es-MX', {
-                                                            style: 'currency',
-                                                            currency: 'MXN',
-                                                        }).format(item.product.price * item.quantity)}
+                                                <div className="flex flex-col justify-center flex-1">
+                                                    <h3 className="font-semibold">{item.product.name}</h3>
+                                                    <p className="flex items-center gap-1">
+                                                        <BadgeCheck size={14} strokeWidth={3} color="#fcc800" />{' '}
+                                                        {item.product.category.name}
                                                     </p>
+                                                </div>
+
+                                                {/* Controles de cantidad + eliminar */}
+                                                <div className="flex gap-1 items-center">
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-md font-semibold text-primary">
+                                                            {new Intl.NumberFormat('es-MX', {
+                                                                style: 'currency',
+                                                                currency: 'MXN',
+                                                            }).format(item.product.price * item.quantity)}
+                                                        </p>
+                                                        <Button
+                                                            className="px-3"
+                                                            type="button"
+                                                            onClick={() => decreaseQuantity(item.product.productId)}
+                                                        >
+                                                            -
+                                                        </Button>
+                                                        <span className="px-3 py-1 rounded">{item.quantity}</span>
+                                                        <Button
+                                                            className="px-3"
+                                                            type="button"
+                                                            onClick={() => increaseQuantity(item.product.productId)}
+                                                        >
+                                                            +
+                                                        </Button>
+                                                    </div>
                                                     <Button
                                                         className="px-3"
-                                                        onClick={() => decreaseQuantity(item.product.productId)}
+                                                        variant="destructive"
+                                                        onClick={() => removeProduct(item.product.productId)}
                                                     >
-                                                        -
-                                                    </Button>
-                                                    <span className="px-3 py-1 rounded">{item.quantity}</span>
-                                                    <Button
-                                                        className="px-3"
-                                                        onClick={() => increaseQuantity(item.product.productId)}
-                                                    >
-                                                        +
+                                                        <Trash />
                                                     </Button>
                                                 </div>
-                                                <Button
-                                                    className="px-3"
-                                                    variant="destructive"
-                                                    onClick={() => removeProduct(item.product.productId)}
-                                                >
-                                                    <Trash />
-                                                </Button>
+                                            </div>
+
+                                            {/* Campo de notas */}
+                                            <div className="mt-3">
+                                                <textarea
+                                                    placeholder="Agregar notas especiales (ej: sin cebolla, término medio...)"
+                                                    value={item.notes || ''}
+                                                    onChange={(e) => updateNotes(item.product.productId, e.target.value)}
+                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all"
+                                                    rows={2}
+                                                />
                                             </div>
                                         </div>
                                     ))}

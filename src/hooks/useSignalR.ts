@@ -1,7 +1,25 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import * as signalR from "@microsoft/signalr";
 
-const useSignalR = (url: string, onOrderReceived: (order: any) => void) => {
+interface UseSignalRCallbacks {
+    onOrderCreated: (order: any) => void;
+    onOrderUpdated: (order: any) => void;
+}
+
+const useSignalR = (url: string, callbacks: UseSignalRCallbacks) => {
+    const { onOrderCreated, onOrderUpdated } = callbacks;
+
+    // Memoizar callbacks para prevenir reconexiones innecesarias
+    const handleOrderCreated = useCallback((order: any) => {
+        console.log("🔔 Nueva orden recibida:", order);
+        onOrderCreated(order);
+    }, [onOrderCreated]);
+
+    const handleOrderUpdated = useCallback((order: any) => {
+        console.log("🔄 Orden actualizada:", order);
+        onOrderUpdated(order);
+    }, [onOrderUpdated]);
+
     useEffect(() => {
         const connection = new signalR.HubConnectionBuilder()
             .withUrl(url)
@@ -9,10 +27,8 @@ const useSignalR = (url: string, onOrderReceived: (order: any) => void) => {
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
-        connection.on("OrderCreatedEvent", (order) => {
-            console.log("🔔 Nueva orden recibida:", order);
-            onOrderReceived(order);
-        });
+        connection.on("OrderCreatedEvent", handleOrderCreated);
+        connection.on("OrderUpdatedEvent", handleOrderUpdated);
 
         connection
             .start()
@@ -23,7 +39,7 @@ const useSignalR = (url: string, onOrderReceived: (order: any) => void) => {
             connection.stop();
         };
 
-    }, [url, onOrderReceived]);
+    }, [url, handleOrderCreated, handleOrderUpdated]);
 };
 
 export default useSignalR;
