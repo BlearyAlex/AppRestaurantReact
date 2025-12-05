@@ -39,6 +39,15 @@ class OrderService {
             throw error
         }
     }
+
+    async deleteOrder(orderIds: number[]): Promise<ApiResponse<boolean>> {
+        try {
+            const response = await api.delete(`Order/deleteOrders`, { data: orderIds })
+            return response.data
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 export default OrderService;

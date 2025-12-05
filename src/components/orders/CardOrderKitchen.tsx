@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Sofa, RotateCcw } from "lucide-react";
-import TimeElapsed from "@/helpers/timeElapsed";
+import TimeElapsed from "@/helpers/TimeElapsed";
 import { OrderStatus } from "@/enums/orderEnum";
 import {
     getNextStatus,
@@ -14,18 +14,29 @@ import {
     getButtonText,
     getBadgeColor,
     getStatusIcon
-} from "@/helpers/helperButtonOrder";
+} from "@/helpers/HelperButtonOrder";
 import OrderService from "@/api/orderService";
 
-function CardOrderKitchen() {
+interface CardOrderKitchenProps {
+    filter: "pending" | "completed";
+}
+
+function CardOrderKitchen({ filter }: CardOrderKitchenProps) {
     const orders = useKitchenOrdersStore((state) => state.orders);
     const updateOrder = useKitchenOrdersStore((state) => state.updateOrder);
-    const updateOrderStatus = useKitchenOrdersStore((state) => state.updateOrderStatus);
     const addOrder = useKitchenOrdersStore((state) => state.addOrder);
 
     const sortedOrders = [...orders].sort((a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
+
+    const filteredOrders = sortedOrders.filter((order) => {
+        if (filter === "completed") {
+            return order.kitchenStatus === OrderStatus.READY || order.kitchenStatus === OrderStatus.DELIVERED;
+        } else {
+            return order.kitchenStatus !== OrderStatus.READY && order.kitchenStatus !== OrderStatus.DELIVERED;
+        }
+    })
 
     useSignalR("http://localhost:8080/orderHub", {
         onOrderCreated: (order: OrderResponse) => {
@@ -33,32 +44,33 @@ function CardOrderKitchen() {
             playNewOrderSound();
         },
         onOrderUpdated: (order: OrderResponse) => {
-            updateOrder(order);  // 👈 Usar updateOrder en lugar de addOrder
+            updateOrder(order);
         }
     });
 
     const orderService = new OrderService();
 
-    const handleAdvanceStatus = (orderId: number, currentStatus: OrderStatus) => {
+    const handleAdvanceStatus = async (orderId: number, currentStatus: OrderStatus) => {
+        console.log("Click en avanzar", orderId, currentStatus);
         const nextStatus = getNextStatus(currentStatus);
         if (nextStatus) {
-            updateOrderStatus(orderId, nextStatus);
-            orderService.updateOrderStatus(orderId, nextStatus);
+            await orderService.updateOrderStatus(orderId, nextStatus);
+            // SignalR will update the local state via onOrderUpdated
         }
     };
 
-    const handleRevertStatus = (orderId: number, currentStatus: OrderStatus) => {
+    const handleRevertStatus = async (orderId: number, currentStatus: OrderStatus) => {
         const previousStatus = getPreviousStatus(currentStatus);
         if (previousStatus) {
-            updateOrderStatus(orderId, previousStatus);
-
+            await orderService.updateOrderStatus(orderId, previousStatus);
+            // SignalR will update the local state via onOrderUpdated
         }
     };
 
     return (
         <>
             <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {sortedOrders.map((order) => (
+                {filteredOrders.map((order) => (
                     <Card key={order.orderId} className="w-full new-order">
                         <CardHeader>
                             <CardTitle className="text-lg font-semibold text-primary">
@@ -73,9 +85,9 @@ function CardOrderKitchen() {
                             </div>
                             <div className="w-full flex justify-between items-center">
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Estado:</p>
-                                <Badge className={`font-semibold flex items-center gap-1 ${getBadgeColor(order.KitchenStatus)}`}>
-                                    {getStatusIcon(order.KitchenStatus)}
-                                    {order.KitchenStatus}
+                                <Badge className={`font-semibold flex items-center gap-1 ${getBadgeColor(order.kitchenStatus)}`}>
+                                    {getStatusIcon(order.kitchenStatus)}
+                                    {order.kitchenStatus}
                                 </Badge>
                             </div>
                         </CardHeader>
@@ -99,18 +111,18 @@ function CardOrderKitchen() {
                             <div className="mt-4 space-y-2">
                                 {/* Botón principal para avanzar */}
                                 <Button
-                                    onClick={() => handleAdvanceStatus(order.orderId, order.KitchenStatus)}
-                                    disabled={order.KitchenStatus === OrderStatus.DELIVERED}
+                                    onClick={() => handleAdvanceStatus(order.orderId, order.kitchenStatus)}
+                                    disabled={order.kitchenStatus === OrderStatus.DELIVERED}
                                     className="w-full"
-                                    variant={order.KitchenStatus === OrderStatus.DELIVERED ? "secondary" : "default"}
+                                    variant={order.kitchenStatus === OrderStatus.DELIVERED ? "secondary" : "default"}
                                 >
-                                    {getButtonText(order.KitchenStatus)}
+                                    {getButtonText(order.kitchenStatus)}
                                 </Button>
 
                                 {/* Botón secundario para retroceder */}
-                                {order.KitchenStatus !== OrderStatus.PENDING && order.KitchenStatus !== OrderStatus.DELIVERED && (
+                                {order.kitchenStatus !== OrderStatus.PENDING && order.kitchenStatus !== OrderStatus.DELIVERED && (
                                     <Button
-                                        onClick={() => handleRevertStatus(order.orderId, order.KitchenStatus)}
+                                        onClick={() => handleRevertStatus(order.orderId, order.kitchenStatus)}
                                         variant="outline"
                                         size="sm"
                                         className="w-full"

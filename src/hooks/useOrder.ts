@@ -62,6 +62,18 @@ const useOrder = () => {
         }
     }
 
+    const deleteOrder = async (orderId: number) => {
+        try {
+            await toast.promise(orderService.deleteOrder([orderId]), {
+                loading: "Eliminando orden...",
+                success: "Orden eliminada.",
+                error: "Error al eliminar la orden.",
+            });
+        } catch (error) {
+            setError(`No se pudo eliminar la orden. ${error}`)
+        }
+    }
+
     return {
         data,
         loading,
