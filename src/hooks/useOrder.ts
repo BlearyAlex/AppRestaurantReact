@@ -62,15 +62,15 @@ const useOrder = () => {
         }
     }
 
-    const deleteOrder = async (orderId: number) => {
+    const deleteOrder = async (orderIds: number[]) => {
         try {
-            await toast.promise(orderService.deleteOrder([orderId]), {
-                loading: "Eliminando orden...",
-                success: "Orden eliminada.",
-                error: "Error al eliminar la orden.",
+            await toast.promise(orderService.deleteOrder(orderIds), {
+                loading: "Eliminando ordenes...",
+                success: "Ordenes eliminadas.",
+                error: "Error al eliminar las ordenes.",
             });
         } catch (error) {
-            setError(`No se pudo eliminar la orden. ${error}`)
+            setError(`No se pudo eliminar las ordenes. ${error}`)
         }
     }
 
@@ -81,7 +81,8 @@ const useOrder = () => {
         createOrder,
         getTableOrders,
         updateProductQuantities,
-        updateOrderStatus
+        updateOrderStatus,
+        deleteOrder
     }
 };
 

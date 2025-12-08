@@ -5,8 +5,8 @@ export enum OrderType {
 }
 
 export enum OrderStatus {
-    PENDING = 'PENDING',
-    IN_PROGRESS = 'IN_PROGRESS',
-    READY = 'READY',
-    DELIVERED = 'DELIVERED'
+    PENDING = "Pending",
+    IN_PROGRESS = "In_Progress",
+    READY = "Ready",
+    DELIVERED = "Delivered"
 }

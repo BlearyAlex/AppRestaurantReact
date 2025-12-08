@@ -9,6 +9,7 @@ interface KitchenOrdersState {
     updateOrder: (order: OrderResponse) => void;
     updateOrderStatus: (orderId: number, newStatus: OrderStatus) => void;
     clearOrders: () => void;
+    clearDeliveredOrders: () => void;
 }
 
 export const useKitchenOrdersStore = create<KitchenOrdersState>()(
@@ -42,7 +43,11 @@ export const useKitchenOrdersStore = create<KitchenOrdersState>()(
                             : order
                     )
                 })),
-            clearOrders: () => set({ orders: [] })
+            clearOrders: () => set({ orders: [] }),
+            clearDeliveredOrders: () =>
+                set((state) => ({
+                    orders: state.orders.filter((order) => order.kitchenStatus !== OrderStatus.DELIVERED)
+                }))
         }),
         {
             name: "kitchen-orders-storage",
