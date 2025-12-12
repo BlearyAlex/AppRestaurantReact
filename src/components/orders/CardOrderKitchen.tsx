@@ -1,7 +1,4 @@
-import { playNewOrderSound } from "@/helpers/soundHelper";
-import useSignalR from "@/hooks/useSignalR";
 import { useKitchenOrdersStore } from "@/store/kitchenOrderStore";
-import type { OrderResponse } from "@/types/order";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -23,8 +20,6 @@ interface CardOrderKitchenProps {
 
 function CardOrderKitchen({ filter }: CardOrderKitchenProps) {
     const orders = useKitchenOrdersStore((state) => state.orders);
-    const updateOrder = useKitchenOrdersStore((state) => state.updateOrder);
-    const addOrder = useKitchenOrdersStore((state) => state.addOrder);
 
     const sortedOrders = [...orders].sort((a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -37,16 +32,6 @@ function CardOrderKitchen({ filter }: CardOrderKitchenProps) {
             return order.kitchenStatus !== OrderStatus.READY && order.kitchenStatus !== OrderStatus.DELIVERED;
         }
     })
-
-    useSignalR("http://localhost:8080/orderHub", {
-        onOrderCreated: (order: OrderResponse) => {
-            addOrder(order);
-            playNewOrderSound();
-        },
-        onOrderUpdated: (order: OrderResponse) => {
-            updateOrder(order);
-        }
-    });
 
     const orderService = new OrderService();
 

@@ -15,6 +15,8 @@ import {
 import { ChevronDown, ChevronRight } from "lucide-react"
 import React from "react"
 import { AnimatePresence, motion } from "framer-motion"
+import { useKitchenOrdersStore } from "@/store/kitchenOrderStore"
+import { Badge } from "./ui/badge"
 
 export function NavMain({
   items,
@@ -71,7 +73,11 @@ export function NavMain({
                   >
                     <Link to={item.url} tabIndex={hasSubmenu ? -1 : 0} className="flex items-center w-full">
                       {item.icon && <item.icon />}
+
                       <span>{item.title}</span>
+
+                      {item.title === 'Cocina' && <KitchenBadge />}
+
                       {hasSubmenu && (
                         <span className="ml-auto flex items-center px-1">
                           {isOpen ? (
@@ -122,4 +128,19 @@ export function NavMain({
       </SidebarGroupContent>
     </SidebarGroup>
   )
+}
+
+function KitchenBadge() {
+  const pendingCount = useKitchenOrdersStore((state) => state.pendingCount);
+
+  if (pendingCount === 0) return null;
+
+  return (
+    <Badge
+      variant="destructive"
+      className="ml-auto mr-2 h-5 min-w-5 px-1.5 text-[10px] font-bold flex items-center justify-center rounded-full bg-red-500 text-white shadow-lg shadow-red-500/50 animate-pulse"
+    >
+      {pendingCount}
+    </Badge>
+  );
 }

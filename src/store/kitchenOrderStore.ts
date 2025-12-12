@@ -5,48 +5,97 @@ import { persist } from "zustand/middleware";
 
 interface KitchenOrdersState {
     orders: OrderResponse[];
+    pendingCount: number;
+
     addOrder: (order: OrderResponse) => void;
     updateOrder: (order: OrderResponse) => void;
     updateOrderStatus: (orderId: number, newStatus: OrderStatus) => void;
+    removeOrder: (orderId: number) => void;
+
     clearOrders: () => void;
     clearDeliveredOrders: () => void;
+
+    updatePendingCount: () => void;
 }
 
 export const useKitchenOrdersStore = create<KitchenOrdersState>()(
     persist(
         (set) => ({
             orders: [],
+            pendingCount: 0,
+
             addOrder: (order) =>
-                set((state) => ({
-                    orders: [...state.orders, {
+                set((state) => {
+                    const newOrders = [...state.orders, {
                         ...order,
                         KitchenStatus: OrderStatus.PENDING
-                    }]
-                })),
+                    }];
+                    const pendingCount = newOrders.filter(o =>
+                        o.kitchenStatus === OrderStatus.PENDING ||
+                        o.kitchenStatus === OrderStatus.IN_PROGRESS
+                    ).length;
+                    return { orders: newOrders, pendingCount };
+                }),
+
             updateOrder: (order) =>
                 set((state) => {
                     const existingIndex = state.orders.findIndex(o => o.orderId === order.orderId);
+                    let updatedOrders;
                     if (existingIndex !== -1) {
-                        // Actualizar orden existente
-                        const updatedOrders = [...state.orders];
+                        updatedOrders = [...state.orders];
                         updatedOrders[existingIndex] = order;
-                        return { orders: updatedOrders };
+                    } else {
+                        updatedOrders = [...state.orders, order];
                     }
-                    // Si la orden no existe, agregarla
-                    return { orders: [...state.orders, order] };
+                    const pendingCount = updatedOrders.filter(o =>
+                        o.kitchenStatus === OrderStatus.PENDING ||
+                        o.kitchenStatus === OrderStatus.IN_PROGRESS
+                    ).length;
+                    return { orders: updatedOrders, pendingCount };
                 }),
+
             updateOrderStatus: (orderId, newStatus) =>
-                set((state) => ({
-                    orders: state.orders.map((order) =>
+                set((state) => {
+                    const updatedOrders = state.orders.map((order) =>
                         order.orderId === orderId
                             ? { ...order, KitchenStatus: newStatus }
                             : order
-                    )
-                })),
-            clearOrders: () => set({ orders: [] }),
+                    );
+                    const pendingCount = updatedOrders.filter(o =>
+                        o.kitchenStatus === OrderStatus.PENDING ||
+                        o.kitchenStatus === OrderStatus.IN_PROGRESS
+                    ).length;
+                    return { orders: updatedOrders, pendingCount };
+                }),
+
+            removeOrder: (orderId) =>
+                set((state) => {
+                    const updatedOrders = state.orders.filter((order) => order.orderId !== orderId);
+                    const pendingCount = updatedOrders.filter(o =>
+                        o.kitchenStatus === OrderStatus.PENDING ||
+                        o.kitchenStatus === OrderStatus.IN_PROGRESS
+                    ).length;
+                    return { orders: updatedOrders, pendingCount };
+                }),
+
+            clearOrders: () => set({ orders: [], pendingCount: 0 }),
+
             clearDeliveredOrders: () =>
+                set((state) => {
+                    const updatedOrders = state.orders.filter((order) => order.kitchenStatus !== OrderStatus.DELIVERED);
+                    const pendingCount = updatedOrders.filter(o =>
+                        o.kitchenStatus === OrderStatus.PENDING ||
+                        o.kitchenStatus === OrderStatus.IN_PROGRESS
+                    ).length;
+                    return { orders: updatedOrders, pendingCount };
+                }),
+
+            updatePendingCount: () =>
                 set((state) => ({
-                    orders: state.orders.filter((order) => order.kitchenStatus !== OrderStatus.DELIVERED)
+                    pendingCount: state.orders.filter(o =>
+                        o.kitchenStatus === OrderStatus.PENDING ||
+                        o.kitchenStatus === OrderStatus.IN_PROGRESS
+                    ).length
                 }))
         }),
         {
