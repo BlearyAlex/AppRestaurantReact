@@ -21,10 +21,21 @@ function Auth() {
   const navigate = useNavigate();
 
   const onSubmit = async (data: RegisterDto) => {
+
     setServerError(null);
     setLoading(true);
+
     try {
-      await authService.register(data);
+      const { confirmPassword, firstName, lastName, ...rest } = data
+
+      const request = {
+        ...rest,
+        firstName: firstName,
+        lastName: lastName,
+      };
+
+      await authService.register(request);
+
       reset();
       navigate("/login");
     } catch (error: any) {
@@ -62,21 +73,29 @@ function Auth() {
 
           <CardContent className="px-0">
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-              {/* Nombre completo */}
+              {/* Nombre */}
               <div className="grid gap-2">
-                <Label htmlFor="fullName">Nombre completo</Label>
-                <Input id="fullName" {...register("fullName")} placeholder="Juan Pérez" />
-                {errors.fullName && (
-                  <p className="text-sm text-red-600">{errors.fullName.message}</p>
+                <Label htmlFor="firstName">Nombre</Label>
+                <Input
+                    id="firstName"
+                    {...register("firstName")}
+                    placeholder="Juan"
+                />
+                {errors.firstName && (
+                    <p className="text-sm text-red-600">{errors.firstName.message}</p>
                 )}
               </div>
 
-              {/* Nombre de usuario */}
+              {/* Apellido */}
               <div className="grid gap-2">
-                <Label htmlFor="userName">Nombre de usuario</Label>
-                <Input id="userName" {...register("userName")} placeholder="juanperez123" />
-                {errors.userName && (
-                  <p className="text-sm text-red-600">{errors.userName.message}</p>
+                <Label htmlFor="lastName">Apellido</Label>
+                <Input
+                    id="lastName"
+                    {...register("lastName")}
+                    placeholder="Pérez"
+                />
+                {errors.lastName && (
+                    <p className="text-sm text-red-600">{errors.lastName.message}</p>
                 )}
               </div>
 

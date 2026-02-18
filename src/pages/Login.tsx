@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { loginScheme, type LoginDto } from '@/schemas/authSchemas'
 import useAuthStore from '@/store/authStore';
 import { zodResolver } from '@hookform/resolvers/zod'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router';
 
@@ -25,15 +25,22 @@ function Login() {
     const onSubmit = async (data: LoginDto) => {
         setServerError(null);
         setLoading(true);
+
         try {
             const response = await authService.login(data);
+
+            const authData = response.data;
+
             setLoginResponse({
-                token: response.data.token,
-                user: {
-                    userId: response.data.userId,
-                    fullName: response.data.fullName,
-                    restaurants: response.data.restaurants,
+                token: authData?.accessToken,
+                restaurant: {
+                    restaurantId: authData?.restaurant?.restaurantId,
+                    role: authData?.restaurant?.role,
                 },
+                user: {
+                    userId: authData?.user?.userId,
+                    fullName: authData?.user?.fullName,
+                }
             });
             navigate("/dashboard"); // Redirigir tras login exitoso
         } catch (err: any) {

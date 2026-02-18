@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# JetBrains Rider
+.idea/
+*.sln.iml
