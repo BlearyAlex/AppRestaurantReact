@@ -1,61 +1,109 @@
-import { create } from 'zustand'
+// store/useAuthStore.ts
+
+import { create } from "zustand";
+import type {
+    AuthResponse,
+    UserInfo,
+    UserRestaurantResponse
+} from "@/types/auth";
 
 interface AuthState {
-    token: string | null;
-    user: { username: string } | null;
-    loginResponse: any;
-    selectedRestaurantId: number | null;
+    accessToken: string | null;
+    refreshToken: string | null;
+    user: UserInfo | null;
+    availableRestaurants: UserRestaurantResponse[] | null;
+    selectedRestaurantId: string | null;
 }
 
 interface AuthActions {
-    setLoginResponse: (response: any) => void;
+    setAuthData: (response: AuthResponse) => void;
     setToken: (token: string) => void;
+    setRefreshToken: (token: string) => void;
+    setSelectedRestaurant: (restaurantId: string) => void;
     logout: () => void;
     isAuthenticated: () => boolean;
-    setSelectedRestaurant: (id: number) => void;
 }
 
 const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
-    // State
-    token: localStorage.getItem('token'),
-    user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null,
-    loginResponse: null,
-    selectedRestaurantId: localStorage.getItem("selectedRestaurantId")
-        ? Number(localStorage.getItem("selectedRestaurantId"))
+    // ------------------
+    // STATE
+    // ------------------
+    accessToken: localStorage.getItem("accessToken"),
+    refreshToken: localStorage.getItem("refreshToken"),
+    user: localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user")!)
         : null,
+    availableRestaurants: localStorage.getItem("availableRestaurants")
+        ? JSON.parse(localStorage.getItem("availableRestaurants")!)
+        : null,
+    selectedRestaurantId: localStorage.getItem("selectedRestaurantId"),
 
+    // ------------------
+    // ACTIONS
+    // ------------------
+    setAuthData: (response: AuthResponse) => {
+        const selectedRestaurant = response.restaurant?.restaurantId ?? null;
 
-    // Actions
-    setLoginResponse: (response) => {
         set({
-            loginResponse: response,
-            token: response.token,
-            user: response.user,
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            user: response.user ?? null,
+            availableRestaurants: response.availableRestaurants ?? null,
+            selectedRestaurantId: selectedRestaurant
         });
-        localStorage.setItem('token', response.token)
-        localStorage.setItem('user', JSON.stringify(response.user));
+
+        localStorage.setItem("accessToken", response.accessToken);
+        localStorage.setItem("refreshToken", response.refreshToken);
+
+        if (response.user) {
+            localStorage.setItem("user", JSON.stringify(response.user));
+        }
+
+        if (response.availableRestaurants) {
+            localStorage.setItem(
+                "availableRestaurants",
+                JSON.stringify(response.availableRestaurants)
+            );
+        }
+
+        if (selectedRestaurant) {
+            localStorage.setItem(
+                "selectedRestaurantId",
+                selectedRestaurant
+            );
+        }
     },
 
-    setToken: (token) => {
-        set({ token });
-        localStorage.setItem('token', token);
+    setToken: (token: string) => {
+        set({ accessToken: token });
+        localStorage.setItem("accessToken", token);
+    },
+
+    setRefreshToken: (token: string) => {
+        set({ refreshToken: token });
+        localStorage.setItem("refreshToken", token);
+    },
+
+    setSelectedRestaurant: (restaurantId: string) => {
+        set({ selectedRestaurantId: restaurantId });
+        localStorage.setItem("selectedRestaurantId", restaurantId);
     },
 
     logout: () => {
-        set({ token: null, user: null, loginResponse: null });
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem("selectedRestaurantId");
+        set({
+            accessToken: null,
+            refreshToken: null,
+            user: null,
+            availableRestaurants: null,
+            selectedRestaurantId: null
+        });
+
+        localStorage.clear();
     },
 
     isAuthenticated: () => {
-        return !!get().token; // accede al estado actual
-    },
-
-    setSelectedRestaurant: (id: number) => {
-        set({ selectedRestaurantId: id });
-        localStorage.setItem("selectedRestaurantId", id.toString());
-      },
+        return !!get().accessToken;
+    }
 }));
 
 export default useAuthStore;

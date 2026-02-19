@@ -25,6 +25,7 @@ export interface AuthResponse {
     accessToken: string;
     refreshToken: string;
     expiresIn: number;
+
     restaurant?: RestaurantInfo | null;
     user?: UserInfo | null;
     availableRestaurants?: UserRestaurantResponse[] | null;

@@ -13,36 +13,39 @@ import { Link, useNavigate } from 'react-router';
 const authService = new AuthService();
 
 function Login() {
+
     const { register, handleSubmit, formState: { errors } } = useForm<LoginDto>({
         resolver: zodResolver(loginScheme),
     });
 
-    const setLoginResponse = useAuthStore((state) => state.setLoginResponse);
+    const setAuthData = useAuthStore((state) => state.setAuthData);
+
     const [serverError, setServerError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+
     const navigate = useNavigate();
 
     const onSubmit = async (data: LoginDto) => {
+
         setServerError(null);
         setLoading(true);
 
         try {
             const response = await authService.login(data);
 
-            const authData = response.data;
+            if (!response.data) {
+                setServerError("Respuesta inválida del servidor");
+                return;
+            }
 
-            setLoginResponse({
-                token: authData?.accessToken,
-                restaurant: {
-                    restaurantId: authData?.restaurant?.restaurantId,
-                    role: authData?.restaurant?.role,
-                },
-                user: {
-                    userId: authData?.user?.userId,
-                    fullName: authData?.user?.fullName,
-                }
-            });
-            navigate("/dashboard"); // Redirigir tras login exitoso
+            setAuthData(response.data);
+
+            if (response.data?.availableRestaurants && response.data.availableRestaurants.length > 1) {
+                navigate("/select-restaurant")
+            }
+            else {
+                navigate("/dashboard");
+            }
         } catch (err: any) {
             setServerError(err.response?.data?.message || "Error al iniciar sesión");
         } finally {
