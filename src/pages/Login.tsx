@@ -38,12 +38,16 @@ function Login() {
                 return;
             }
 
-            setAuthData(response.data);
-
             if (response.data?.availableRestaurants && response.data.availableRestaurants.length > 1) {
-                navigate("/select-restaurant")
-            }
-            else {
+                setAuthData(response.data);
+                navigate("/select-restaurant", {
+                    state: {
+                        credentials: data,
+                        availableRestaurants: response.data.availableRestaurants,
+                    }
+                });
+            } else {
+                setAuthData(response.data);
                 navigate("/dashboard");
             }
         } catch (err: any) {

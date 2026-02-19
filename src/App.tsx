@@ -28,11 +28,9 @@ function App() {
                     <Route index element={<Navigate to="/register" replace/>}/>
                     <Route path="register" element={<Auth/>}/>
                     <Route path="login" element={<Login/>}/>
-                </Route>
 
-                {/*Seleccionar restaurantes*/}
-                <Route element={<ProtectedRoute requireRestaurant={false}/>}>
-                    <Route path="/select-restaurant" element={<SelectRestaurant />} />
+                    {/* No necesita ProtectedRoute: el componente valida el router state */}
+                    <Route path="select-restaurant" element={<SelectRestaurant/>}/>
                 </Route>
 
                 {/* Rutas protegidas */}

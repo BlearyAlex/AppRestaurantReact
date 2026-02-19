@@ -1,32 +1,65 @@
-﻿import {useNavigate} from "react-router";
+﻿import { useNavigate, useLocation } from "react-router";
 import useAuthStore from "@/store/authStore.ts";
-import {useEffect} from "react";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {Button} from "@/components/ui/button.tsx";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import AuthService from "@/api/authService";
+import type { LoginDto, UserRestaurantResponse } from "@/types/auth";
+
+const authService = new AuthService();
 
 function SelectRestaurant() {
     const navigate = useNavigate();
+    const location = useLocation();
 
-    const {
-        availableRestaurants,
-        setSelectedRestaurant,
-        isAuthenticated
-    } = useAuthStore()
+    // Datos pasados desde Login.tsx via navigate state
+    const credentials = location.state?.credentials as LoginDto | undefined;
+    // Leemos availableRestaurants del state para no depender del store,
+    // que se sobrescribe al hacer el segundo login con restaurantId.
+    const restaurants = location.state?.availableRestaurants as UserRestaurantResponse[] | undefined;
+
+    const { setAuthData, logout } = useAuthStore();
+
+    const [loadingId, setLoadingId] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!isAuthenticated()) {
-            navigate("login")
-            return;
+        // Solo protege al montar: si no hay credenciales o restaurantes, volver al login
+        if (!credentials || !restaurants || restaurants.length === 0) {
+            navigate("/login", { replace: true });
         }
+    }, []); // Solo en mount, no reaccionar a cambios del store
 
-        if (!availableRestaurants || availableRestaurants.length === 0) {
-            navigate("/dashboard");
+    const handleSelect = async (restaurantId: string) => {
+        if (!credentials) return;
+
+        setLoadingId(restaurantId);
+        setError(null);
+
+        try {
+            // Re-autenticar con el restaurante seleccionado para obtener el token real
+            const response = await authService.login({
+                ...credentials,
+                restaurantId,
+            });
+
+            if (!response.data?.accessToken) {
+                setError("No se pudo obtener el token. Intenta de nuevo.");
+                return;
+            }
+
+            setAuthData(response.data);
+            navigate("/dashboard", { replace: true });
+        } catch {
+            setError("Error al seleccionar el restaurante. Intenta de nuevo.");
+        } finally {
+            setLoadingId(null);
         }
-    }, [availableRestaurants, isAuthenticated, navigate]);
+    };
 
-    const handleSelect = (restaurantId: string) => {
-        setSelectedRestaurant(restaurantId);
-        navigate("/dashboard");
+    const handleCancel = () => {
+        logout();
+        navigate("/login", { replace: true });
     };
 
     return (
@@ -44,7 +77,11 @@ function SelectRestaurant() {
 
                 <CardContent className="flex flex-col gap-4">
 
-                    {availableRestaurants?.map((restaurant) => (
+                    {error && (
+                        <p className="text-sm text-red-600 text-center">{error}</p>
+                    )}
+
+                    {restaurants?.map((restaurant) => (
                         <div
                             key={restaurant.restaurantId}
                             className="flex justify-between items-center border rounded-lg p-4 hover:bg-muted transition"
@@ -60,11 +97,16 @@ function SelectRestaurant() {
 
                             <Button
                                 onClick={() => handleSelect(restaurant.restaurantId)}
+                                disabled={loadingId !== null}
                             >
-                                Entrar
+                                {loadingId === restaurant.restaurantId ? "Entrando..." : "Entrar"}
                             </Button>
                         </div>
                     ))}
+
+                    <Button variant="ghost" className="mt-2 text-muted-foreground" onClick={handleCancel}>
+                        Cancelar y volver al inicio
+                    </Button>
 
                 </CardContent>
 
