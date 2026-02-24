@@ -9,25 +9,23 @@ function ProtectedRoute({requireRestaurant = true}: ProtectedRouteProps) {
 
     const {
         accessToken,
-        selectedRestaurantId,
-        availableRestaurants
+        isTemporaryToken,
+        selectedRestaurantId
     } = useAuthStore();
 
+    // ❌ No autenticado
     if (!accessToken) {
         return <Navigate to="/login" replace />;
     }
 
-    // 🔄 Si requiere restaurante seleccionado
-    if (requireRestaurant) {
+    // ❌ Token temporal intentando entrar a rutas protegidas
+    if (requireRestaurant && isTemporaryToken) {
+        return <Navigate to="/select-restaurant" replace />;
+    }
 
-        // Si tiene varios restaurantes y no ha seleccionado uno
-        if (
-            availableRestaurants &&
-            availableRestaurants.length > 1 &&
-            !selectedRestaurantId
-        ) {
-            return <Navigate to="/select-restaurant" replace />;
-        }
+    // ❌ No tiene restaurante seleccionado
+    if (requireRestaurant && !selectedRestaurantId) {
+        return <Navigate to="/select-restaurant" replace />;
     }
 
     return <Outlet />;

@@ -1,47 +1,53 @@
-import type {LoginDto, RegisterOwnerRequest, AuthResponse} from '@/types/auth';
-import api from './api';
-import type {ApiResponse} from "@/types/api";
+import type { LoginDto, RegisterOwnerRequest, AuthResponse } from "@/types/auth";
+import type { ApiResponse } from "@/types/api";
+import api from "./api";
 
 class AuthService {
-    async register(payload: RegisterOwnerRequest): Promise<ApiResponse<AuthResponse>> {
-        try {
-            const response = await api.post("/auth/register", payload);
-            return response.data;
-        } catch (error) {
-            throw error
-        }
+
+    async register(payload: RegisterOwnerRequest): Promise<AuthResponse> {
+        const response = await api.post<ApiResponse<AuthResponse>>(
+            "/auth/register",
+            payload
+        );
+
+        return response.data.data;
     }
 
-    async login(payload: LoginDto): Promise<ApiResponse<AuthResponse>> {
-        try {
-            const response = await api.post("/auth/login", payload)
-            return response.data;
-        } catch (error) {
-            throw error
-        }
+    async login(payload: LoginDto): Promise<AuthResponse> {
+        const response = await api.post<ApiResponse<AuthResponse>>(
+            "/auth/login",
+            payload
+        );
+
+        return response.data.data;
     }
 
-    async selectRestaurant(restaurantId: string, tempToken: string): Promise<ApiResponse<AuthResponse>> {
-        try {
-            const response = await api.post("/auth/select-restaurant",
-                restaurantId,
-                {
-                    headers: {Authorization: `Bearer ${tempToken}`},
-                });
-            return response.data;
-        } catch (error) {
-            throw error
-        }
+    async logout(refreshToken: string): Promise<boolean> {
+        const response = await api.post<ApiResponse<boolean>>(
+            "/auth/logout",
+            {refreshToken}
+        );
+
+        return response.data.data;
     }
 
-    async switchRestaurant(restaurantId: string): Promise<ApiResponse<AuthResponse>> {
-        try {
-            const response = await api.post("/auth/switch-restaurant", restaurantId);
-            return response.data;
-        } catch (error) {
-            throw error
-        }
+    async selectRestaurant(restaurantId: string): Promise<AuthResponse> {
+        const response = await api.post<ApiResponse<AuthResponse>>(
+            "/auth/select-restaurant",
+            restaurantId
+        );
+
+        return response.data.data;
+    }
+
+    async switchRestaurant(restaurantId: string): Promise<AuthResponse> {
+        const response = await api.post<ApiResponse<AuthResponse>>(
+            "/auth/switch-restaurant",
+            restaurantId
+        );
+
+        return response.data.data;
     }
 }
 
-export default AuthService
+export default AuthService;

@@ -11,37 +11,47 @@ function SelectRestaurant() {
 
     const navigate = useNavigate();
 
-    const {accessToken,availableRestaurants, setAuthData, logout} = useAuthStore();
+    const {
+        availableRestaurants,
+        setAuthData,
+        logout,
+        isTemporaryToken,
+        accessToken
+    } = useAuthStore();
 
     const [loadingId, setLoadingId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // Protege la ruta: si no hay token temporal o restaurantes, volver al login
+
+        // Si no hay token → login
         if (!accessToken) {
-            navigate("/login", {replace: true});
+            navigate("/login", { replace: true });
+            return;
         }
-    }, [accessToken, availableRestaurants, navigate]);
+
+        // Si ya no es temporal → dashboard
+        if (!isTemporaryToken) {
+            navigate("/dashboard", { replace: true });
+            return;
+        }
+
+    }, [accessToken, isTemporaryToken, navigate]);
+
 
     const handleSelect = async (restaurantId: string) => {
-        setLoadingId(restaurantId);
-        setError(null);
-
         try {
-            // 🔑 Llamada al endpoint select-restaurant con token temporal
-            const response = await authService.selectRestaurant(restaurantId, accessToken!)
+            setError(null);
+            setLoadingId(restaurantId);
 
-            if (!response.data?.accessToken) {
-                setError("No se pudo obtener el token definitivo. Intenta de nuevo.");
-                return;
-            }
+            const data = await authService.selectRestaurant(restaurantId);
 
-            // Guardamos token real y restaurante seleccionado en el store
-            setAuthData(response.data);
+            setAuthData(data);
 
             navigate("/dashboard", {replace: true});
-        } catch(err: any) {
-            setError(err.response?.data?.message ||"Error al seleccionar el restaurante. Intenta de nuevo.");
+
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Error al seleccionar el restaurante. Intenta de nuevo.");
         } finally {
             setLoadingId(null);
         }
@@ -51,6 +61,26 @@ function SelectRestaurant() {
         logout();
         navigate("/login", {replace: true});
     };
+
+    if (!availableRestaurants || availableRestaurants.length === 0) {
+        return (
+            <div className="flex justify-center items-center min-h-screen bg-muted/40 p-4">
+                <Card className="w-full max-w-md shadow-lg">
+                    <CardHeader>
+                        <CardTitle>No hay restaurantes disponibles</CardTitle>
+                        <CardDescription>
+                            No tienes acceso a ningún restaurante actualmente.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button onClick={handleCancel} className="w-full">
+                            Volver al login
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-muted/40 p-4">
@@ -68,10 +98,12 @@ function SelectRestaurant() {
                 <CardContent className="flex flex-col gap-4">
 
                     {error && (
-                        <p className="text-sm text-red-600 text-center">{error}</p>
+                        <p className="text-sm text-red-600 text-center">
+                            {error}
+                        </p>
                     )}
 
-                    {availableRestaurants?.map((restaurant) => (
+                    {availableRestaurants.map((restaurant) => (
                         <div
                             key={restaurant.restaurantId}
                             className="flex justify-between items-center border rounded-lg p-4 hover:bg-muted transition"
@@ -89,17 +121,22 @@ function SelectRestaurant() {
                                 onClick={() => handleSelect(restaurant.restaurantId)}
                                 disabled={loadingId !== null}
                             >
-                                {loadingId === restaurant.restaurantId ? "Entrando..." : "Entrar"}
+                                {loadingId === restaurant.restaurantId
+                                    ? "Entrando..."
+                                    : "Entrar"}
                             </Button>
                         </div>
                     ))}
 
-                    <Button variant="ghost" className="mt-2 text-muted-foreground" onClick={handleCancel}>
+                    <Button
+                        variant="ghost"
+                        className="mt-2 text-muted-foreground"
+                        onClick={handleCancel}
+                    >
                         Cancelar y volver al inicio
                     </Button>
 
                 </CardContent>
-
             </Card>
         </div>
     );

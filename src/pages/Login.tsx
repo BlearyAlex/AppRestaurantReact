@@ -1,32 +1,29 @@
 import AuthService from '@/api/authService';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { loginScheme, type LoginDto } from '@/schemas/authSchemas'
+import {Button} from '@/components/ui/button';
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from '@/components/ui/card';
+import {Input} from '@/components/ui/input';
+import {Label} from '@/components/ui/label';
+import {loginScheme, type LoginDto} from '@/schemas/authSchemas'
 import useAuthStore from '@/store/authStore';
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { Link, useNavigate } from 'react-router';
+import {zodResolver} from '@hookform/resolvers/zod'
+import {useState} from 'react'
+import {useForm} from 'react-hook-form'
+import {Link, useNavigate} from 'react-router';
 
 const authService = new AuthService();
 
 function Login() {
 
-    const { register, handleSubmit, formState: { errors } } = useForm<LoginDto>({
+    const {register, handleSubmit, formState: {errors}} = useForm<LoginDto>({
         resolver: zodResolver(loginScheme),
     });
 
-    // Función del store global para guardar datos del usuario autenticado
-    const setAuthData = useAuthStore((state) => state.setAuthData);
+    const navigate = useNavigate();
+    const {setAuthData} = useAuthStore();
 
     // Estado para mostrar errores que vienen del servidor (ej: credenciales inválidas)
     const [serverError, setServerError] = useState<string | null>(null);
-
     const [loading, setLoading] = useState(false);
-
-    const navigate = useNavigate();
 
     const onSubmit = async (data: LoginDto) => {
 
@@ -35,27 +32,24 @@ function Login() {
 
         try {
             // Llamada al backend para iniciar sesión
-            const response = await authService.login(data);
+            const authResponse = await authService.login(data);
 
-            // Validación básica de seguridad
-            if (!response.data) {
-                setServerError("Respuesta inválida del servidor");
-                return;
-            }
+            // Guardamos TODO el contexto
+            setAuthData(authResponse);
 
-            // 1 Usuario con varios restaurantes
-            if (response.data?.availableRestaurants && response.data.availableRestaurants.length > 1) {
+            // 🔥 Decidir navegación
+            const isTemporaryToken =
+                !authResponse.restaurant &&
+                authResponse.availableRestaurants &&
+                authResponse.availableRestaurants.length > 1;
 
-                // Guardamos token temporal y restaurantes en el store
-                setAuthData(response.data);
-
-                navigate("/select-restaurant"); // redirigimos sin pasar state
+            if (isTemporaryToken) {
+                navigate("/select-restaurant", {replace: true});
             } else {
-                // 2️ Usuario con 1 restaurante → login completo
-                setAuthData(response.data);
-                navigate("/dashboard");
+                navigate("/dashboard", {replace: true});
             }
-        } catch (err: any) {
+        } catch
+            (err: any) {
             setServerError(err.response?.data?.message || "Error al iniciar sesión");
         } finally {
             setLoading(false);
@@ -65,6 +59,7 @@ function Login() {
     return (
         <div className="flex justify-center items-center min-h-screen bg-muted/40 p-4">
             <Card className="flex flex-col md:flex-row overflow-hidden w-full max-w-4xl shadow-lg">
+
                 {/* Imagen lateral */}
                 <div className="relative w-full md:w-1/2 mx-4">
                     <img
@@ -90,6 +85,7 @@ function Login() {
 
                     <CardContent className="px-0">
                         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+
                             {/* Email */}
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Correo electrónico</Label>
@@ -100,11 +96,13 @@ function Login() {
                                     placeholder="correo@ejemplo.com"
                                 />
                                 {errors.email && (
-                                    <p className="text-sm text-red-600">{errors.email.message}</p>
+                                    <p className="text-sm text-red-600">
+                                        {errors.email.message}
+                                    </p>
                                 )}
                             </div>
 
-                            {/* Contraseña */}
+                            {/* Password */}
                             <div className="grid gap-2">
                                 <Label htmlFor="password">Contraseña</Label>
                                 <Input
@@ -114,19 +112,27 @@ function Login() {
                                     placeholder="******"
                                 />
                                 {errors.password && (
-                                    <p className="text-sm text-red-600">{errors.password.message}</p>
+                                    <p className="text-sm text-red-600">
+                                        {errors.password.message}
+                                    </p>
                                 )}
                             </div>
 
-                            {/* Error del servidor */}
+                            {/* Server Error */}
                             {serverError && (
-                                <p className="text-sm text-red-600 text-center">{serverError}</p>
+                                <p className="text-sm text-red-600 text-center">
+                                    {serverError}
+                                </p>
                             )}
 
-                            {/* Botón */}
-                            <Button type="submit" disabled={loading} className="w-full mt-2">
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full mt-2"
+                            >
                                 {loading ? "Iniciando sesión..." : "Entrar"}
                             </Button>
+
                         </form>
                     </CardContent>
 
@@ -139,7 +145,7 @@ function Login() {
                 </div>
             </Card>
         </div>
-    )
+    );
 }
 
 export default Login

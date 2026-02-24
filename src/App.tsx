@@ -17,29 +17,39 @@ import Orders from './pages/Orders'
 import ViewAccount from './pages/ViewAccount'
 import Kitchen from './pages/Kitchen'
 import SelectRestaurant from "@/pages/SelectRestaurant.tsx";
+import SelectRestaurantGuard from "@/utils/SelectRestaurantGuard.tsx";
 
 function App() {
     return (
         <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
             <Toaster richColors closeButton/>
             <Routes>
-                {/* Rutas públicas */}
+
+                {/* Públicas */}
                 <Route path="/" element={<MainLayout/>}>
-                    <Route index element={<Navigate to="/register" replace/>}/>
+
+                    <Route index element={<Navigate to="/login" replace/>}/>
                     <Route path="register" element={<Auth/>}/>
                     <Route path="login" element={<Login/>}/>
-
-                    {/* No necesita ProtectedRoute: el componente valida el router state */}
-                    <Route path="select-restaurant" element={<SelectRestaurant/>}/>
                 </Route>
 
-                {/* Rutas protegidas */}
-                <Route element={<ProtectedRoute/>}>
+                {/* Requieren autenticación */}
+                <Route element={<ProtectedRoute requireRestaurant={false}/>}>
+                    <Route
+                        path="/select-restaurant"
+                        element={
+                            <SelectRestaurantGuard>
+                                <SelectRestaurant/>
+                            </SelectRestaurantGuard>
+                        }
+                    />
+                </Route>
+
+                {/* Requieren restaurante seleccionado */}
+                <Route element={<ProtectedRoute requireRestaurant/>}>
                     <Route path="/dashboard" element={<Dashboard/>}>
 
-                        {/* index del dashboard */}
                         <Route index element={<Navigate to="home" replace/>}/>
-
                         <Route path="home" element={<Home/>}/>
                         <Route path="restaurants" element={<Restaurants/>}/>
                         <Route path="categories" element={<Categories/>}/>
@@ -53,7 +63,6 @@ function App() {
                             <Route path="viewAccount" element={<ViewAccount/>}/>
                             <Route path="kitchen" element={<Kitchen/>}/>
                         </Route>
-
                     </Route>
                 </Route>
 

@@ -8,67 +8,85 @@ const api = axios.create({
     }
 });
 
-// INTERCEPTOR DE SOLICITUDES (Request)
-api.interceptors.request.use(
-    (config) => {
-        const {accessToken, selectedRestaurantId} = useAuthStore.getState();
+const refreshApi = axios.create({
+    baseURL: import.meta.env.VITE_API_URL,
+});
 
-        // 🔐 Añadir el token al header Authorization
-        if (accessToken) {
-            config.headers.Authorization = `Bearer ${accessToken}`;
-        }
+// REQUEST INTERCEPTOR
+api.interceptors.request.use((config) => {
 
-        // 🏪 Añadir el ID del restaurante activo al header X-Restaurant-Id
-        if (selectedRestaurantId) {
-            config.headers['X-Restaurant-Id'] = selectedRestaurantId;
-        }
+    const {
+        accessToken,
+        selectedRestaurantId,
+        isTemporaryToken
+    } = useAuthStore.getState();
 
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+    if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
     }
-);
 
-// INTERCEPTOR DE RESPUESTA (Response)
+    const isAuthRoute =
+        config.url?.includes("/auth/login") ||
+        config.url?.includes("/auth/register") ||
+        config.url?.includes("/auth/select-restaurant") ||
+        config.url?.includes("/auth/refresh-token");
+
+    // 🔐 Bloquear si es token temporal
+    if (isTemporaryToken && !isAuthRoute) {
+        return Promise.reject(
+            new Error("Debe seleccionar un restaurante antes de continuar.")
+        );
+    }
+
+    if (selectedRestaurantId) {
+        config.headers["X-Restaurant-Id"] = selectedRestaurantId;
+    }
+
+    return config;
+});
+
+// RESPONSE INTERCEPTOR
 api.interceptors.response.use(
-    (response) => {
-        return response; // Responde normalmente
-    },
+    (response) => response,
     async (error) => {
-        // Verificar si el error es 401 (token expirado)
-        if (error.response &&
-            error.response.status === 401 &&
+
+        if (
+            error.response?.status === 401 &&
             error.config &&
             !error.config.__isRetryRequest
         ) {
 
-            const {refreshToken} = useAuthStore.getState();
+            const { refreshToken } = useAuthStore.getState();
 
             if (!refreshToken) {
                 useAuthStore.getState().logout();
-                window.location.href = "/login";
+                window.location.replace("/login");
                 return Promise.reject(error);
             }
 
-            // Intentar hacer un refresh del token
             error.config.__isRetryRequest = true;
 
             try {
-                const {data} = await api.post('/auth/refresh-token', {refreshToken});
-                const {accessToken, refreshToken: newRefreshToken} = data.data;
+                const response = await refreshApi.post(
+                    "/auth/refresh-token",
+                    { refreshToken }
+                );
 
-                // Guardar el nuevo token
+                const {
+                    accessToken,
+                    refreshToken: newRefreshToken
+                } = response.data.data;
+
                 useAuthStore.getState().setToken(accessToken);
                 useAuthStore.getState().setRefreshToken(newRefreshToken);
 
-                // Reintentar la solicitud original con el nuevo token
-                error.config.headers['Authorization'] = `Bearer ${accessToken}`;
+                error.config.headers["Authorization"] = `Bearer ${accessToken}`;
+
                 return api(error.config);
+
             } catch {
-                // Si el refresh falla, redirigir a login
                 useAuthStore.getState().logout();
-                window.location.href = '/login';
+                window.location.replace("/login");
             }
         }
 

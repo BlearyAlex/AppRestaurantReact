@@ -16,6 +16,7 @@ interface AuthState {
     user: UserInfo | null;
     availableRestaurants: UserRestaurantResponse[] | null;
     selectedRestaurantId: string | null;
+    isTemporaryToken: boolean;
 }
 
 /**
@@ -23,6 +24,7 @@ interface AuthState {
  */
 interface AuthActions {
     setAuthData: (response: AuthResponse) => void;
+    switchRestaurantContext: (response: AuthResponse) => void;
     setToken: (token: string) => void;
     setRefreshToken: (token: string) => void;
     setSelectedRestaurant: (restaurantId: string) => void;
@@ -48,16 +50,24 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
 
     selectedRestaurantId: localStorage.getItem("selectedRestaurantId"),
 
+    isTemporaryToken:
+        localStorage.getItem("isTemporaryToken") === "true",
+
     // ACCIONES
 
     /**
-     * Guarda todos los datos de autenticación
-     * y los persiste en localStorage
+     * Se usa en LOGIN y SELECT-RESTAURANT
+     * Guarda todo el contexto completo
      */
     setAuthData: (response: AuthResponse) => {
 
         // Si el backend envía restaurante seleccionado
         const selectedRestaurant = response.restaurant?.restaurantId ?? null;
+
+        const isTemp =
+            !response.restaurant &&
+            !!response.availableRestaurants &&
+            response.availableRestaurants.length > 1;
 
         // Actualizamos estado en memoria
         set({
@@ -65,12 +75,14 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
             refreshToken: response.refreshToken,
             user: response.user ?? null,
             availableRestaurants: response.availableRestaurants ?? null,
-            selectedRestaurantId: selectedRestaurant
+            selectedRestaurantId: selectedRestaurant,
+            isTemporaryToken: isTemp
         });
 
-        // Persistimos tokens
+        // Persistencia segura
         localStorage.setItem("accessToken", response.accessToken);
         localStorage.setItem("refreshToken", response.refreshToken);
+        localStorage.setItem("isTemporaryToken", String(isTemp));
 
         // Persistimos usuario si existe
         if (response.user) {
@@ -95,7 +107,36 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
     },
 
     /**
-     * Actualiza solo el accessToken
+     * Se usa cuando el usuario cambia restaurante
+     * (switch-restaurant endpoint)
+     */
+    switchRestaurantContext: (response: AuthResponse) => {
+
+        const selectedRestaurant = response.restaurant?.restaurantId ?? null;
+
+        set({
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            user: response.user ?? null,
+            selectedRestaurantId: selectedRestaurant,
+            isTemporaryToken: false
+        });
+
+        localStorage.setItem("accessToken", response.accessToken);
+        localStorage.setItem("refreshToken", response.refreshToken);
+        localStorage.setItem("isTemporaryToken", "false");
+
+        if (response.user) {
+            localStorage.setItem("user", JSON.stringify(response.user));
+        }
+
+        if (selectedRestaurant) {
+            localStorage.setItem("selectedRestaurantId", selectedRestaurant);
+        }
+    },
+
+    /**
+     * Actualiza solo accessToken (refresh automático)
      */
     setToken: (token: string) => {
         set({ accessToken: token });
@@ -111,7 +152,7 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
     },
 
     /**
-     * Permite cambiar manualmente el restaurante seleccionado
+     * Cambio manual de restaurante (si lo necesitas)
      */
     setSelectedRestaurant: (restaurantId: string) => {
         set({ selectedRestaurantId: restaurantId });
@@ -119,7 +160,7 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
     },
 
     /**
-     * Cierra sesión completamente
+     * Logout limpio y seguro
      */
     logout: () => {
         set({
@@ -127,14 +168,20 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
             refreshToken: null,
             user: null,
             availableRestaurants: null,
-            selectedRestaurantId: null
+            selectedRestaurantId: null,
+            isTemporaryToken: false
         });
 
-        localStorage.clear();
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("availableRestaurants");
+        localStorage.removeItem("selectedRestaurantId");
+        localStorage.removeItem("isTemporaryToken");
     },
 
     /**
-     * Verifica si hay token activo
+     * Verifica autenticación
      */
     isAuthenticated: () => {
         return !!get().accessToken;

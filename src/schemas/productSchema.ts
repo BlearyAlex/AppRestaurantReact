@@ -38,7 +38,7 @@ export const createProductSchema = z.object({
         (val) => (val === "" || val === null || val === undefined ? undefined : val),
         z.enum(["unit", "gram", "milliliter"]).optional()
     ),
-    restaurantId: z.number().int().positive("El restaurante es requerido"),
+    restaurantId: z.string(),
     categoryId: z.preprocess(
         (val) => (val === null || val === undefined || val === 0 ? undefined : val),
         z.number().int().positive("La categoría es requerida").optional()

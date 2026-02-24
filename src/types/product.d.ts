@@ -41,11 +41,6 @@ export interface ProductResponse {
     category: CategoryResponse;
 }
 
-interface RestaurantResponse {
-    restaurantId: number;
-    name: string;
-}
-
 interface CategoryResponse {
     categoryId: number;
     name: string;

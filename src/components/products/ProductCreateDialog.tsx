@@ -1,13 +1,13 @@
 import useProductForm from "@/hooks/useProductForm";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '../ui/dialog';
 import ProductForm from "./ProductForm";
 import useAuthStore from "@/store/authStore";
-import { useEffect } from "react";
+import {useEffect} from "react";
 
-function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmitting }: any) {
-    const { selectedRestaurantId } = useAuthStore();
+function ProductCreateDialog({open, onClose, onSubmit, submitting, setSubmitting}: any) {
+    const {selectedRestaurantId} = useAuthStore();
 
-    const { register, handleSubmit, setValue, reset, errors, watch } = useProductForm(false, {
+    const {register, handleSubmit, setValue, reset, errors, watch} = useProductForm(false, {
         name: "",
         description: "",
         imageUrl: "",
@@ -20,7 +20,7 @@ function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmittin
         unitOfMeasure: "",
         hasPreparationTime: false,
         preparationTime: "",
-        restaurantId: selectedRestaurantId || 0,
+        restaurantId: selectedRestaurantId,
         categoryId: undefined,
     });
 
@@ -32,10 +32,7 @@ function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmittin
     }, [selectedRestaurantId, setValue]);
 
     // Funciones helper para convertir strings a enums numéricos
-    const areaStringToEnum = (area: string): number => {
-        return area === "kitchen" ? 0 : 1;
-    };
-
+    const areaStringToEnum = (area: string): number => area === "kitchen" ? 0 : 1;
     const unitOfMeasureStringToEnum = (unit: string): number | null => {
         switch (unit) {
             case "unit":
@@ -50,43 +47,33 @@ function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmittin
     };
 
     const handleFormSubmit = async (values: any) => {
+        if (!selectedRestaurantId) {
+            console.warn("No se puede crear producto sin restaurante seleccionado");
+            return;
+        }
+
         console.log("SUBMIT DEL FORMULARIO DE PRODUCTO:", values);
+
         try {
             setSubmitting(true);
             console.log("Valores del formulario:", values);
 
-            // Limpiar valores opcionales que no son necesarios y convertir enums
+            // Limpiar valores y convertir enums
             const cleanedValues: any = {
                 name: values.name,
                 description: values.description,
-                imageFile: values.imageFile,
+                imageFile: values.imageFile && values.imageFile[0] ? values.imageFile[0] : undefined,
                 price: values.price,
                 isActive: values.isActive,
                 area: areaStringToEnum(values.area),
                 hasStock: values.hasStock,
                 unit: values.unit,
                 hasPreparationTime: values.hasPreparationTime,
-                restaurantId: values.restaurantId,
+                restaurantId: selectedRestaurantId,
+                stockQuantity: values.hasStock ? values.stockQuantity : undefined,
+                unitOfMeasure: values.unit > 0 && values.unitOfMeasure ? unitOfMeasureStringToEnum(values.unitOfMeasure) : undefined,
+                categoryId: values.categoryId && values.categoryId > 0 ? values.categoryId : undefined,
             };
-
-            // Campos opcionales
-            if (values.imageFile && values.imageFile[0]) {
-                cleanedValues.imageFile = values.imageFile[0];
-            }
-
-            if (values.hasStock && values.stockQuantity !== undefined && values.stockQuantity !== null) {
-                cleanedValues.stockQuantity = values.stockQuantity;
-            }
-
-            if (values.unit > 0 && values.unitOfMeasure && values.unitOfMeasure !== "") {
-                cleanedValues.unitOfMeasure = unitOfMeasureStringToEnum(values.unitOfMeasure);
-            }
-
-            if (values.categoryId && values.categoryId > 0) {
-                cleanedValues.categoryId = values.categoryId;
-            }
-
-            console.log("Valores limpiados para enviar:", cleanedValues);
 
             await onSubmit(cleanedValues);
 
