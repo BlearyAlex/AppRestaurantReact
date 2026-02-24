@@ -37,17 +37,30 @@ api.interceptors.response.use(
     },
     async (error) => {
         // Verificar si el error es 401 (token expirado)
-        if (error.response && error.response.status === 401 && error.config && !error.config.__isRetryRequest) {
+        if (error.response &&
+            error.response.status === 401 &&
+            error.config &&
+            !error.config.__isRetryRequest
+        ) {
+
+            const {refreshToken} = useAuthStore.getState();
+
+            if (!refreshToken) {
+                useAuthStore.getState().logout();
+                window.location.href = "/login";
+                return Promise.reject(error);
+            }
+
             // Intentar hacer un refresh del token
             error.config.__isRetryRequest = true;
-            const refreshToken = useAuthStore.getState().refreshToken;
 
             try {
                 const {data} = await api.post('/auth/refresh-token', {refreshToken});
-                const {accessToken} = data.data; // Suponiendo que `accessToken` viene aquí
+                const {accessToken, refreshToken: newRefreshToken} = data.data;
 
                 // Guardar el nuevo token
                 useAuthStore.getState().setToken(accessToken);
+                useAuthStore.getState().setRefreshToken(newRefreshToken);
 
                 // Reintentar la solicitud original con el nuevo token
                 error.config.headers['Authorization'] = `Bearer ${accessToken}`;

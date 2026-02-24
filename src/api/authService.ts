@@ -1,4 +1,4 @@
-import type { LoginDto, RegisterOwnerRequest, AuthResponse } from '@/types/auth';
+import type {LoginDto, RegisterOwnerRequest, AuthResponse} from '@/types/auth';
 import api from './api';
 import type {ApiResponse} from "@/types/api";
 
@@ -15,6 +15,28 @@ class AuthService {
     async login(payload: LoginDto): Promise<ApiResponse<AuthResponse>> {
         try {
             const response = await api.post("/auth/login", payload)
+            return response.data;
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async selectRestaurant(restaurantId: string, tempToken: string): Promise<ApiResponse<AuthResponse>> {
+        try {
+            const response = await api.post("/auth/select-restaurant",
+                restaurantId,
+                {
+                    headers: {Authorization: `Bearer ${tempToken}`},
+                });
+            return response.data;
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async switchRestaurant(restaurantId: string): Promise<ApiResponse<AuthResponse>> {
+        try {
+            const response = await api.post("/auth/switch-restaurant", restaurantId);
             return response.data;
         } catch (error) {
             throw error

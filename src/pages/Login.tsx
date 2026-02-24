@@ -18,9 +18,12 @@ function Login() {
         resolver: zodResolver(loginScheme),
     });
 
+    // Función del store global para guardar datos del usuario autenticado
     const setAuthData = useAuthStore((state) => state.setAuthData);
 
+    // Estado para mostrar errores que vienen del servidor (ej: credenciales inválidas)
     const [serverError, setServerError] = useState<string | null>(null);
+
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
@@ -31,22 +34,24 @@ function Login() {
         setLoading(true);
 
         try {
+            // Llamada al backend para iniciar sesión
             const response = await authService.login(data);
 
+            // Validación básica de seguridad
             if (!response.data) {
                 setServerError("Respuesta inválida del servidor");
                 return;
             }
 
+            // 1 Usuario con varios restaurantes
             if (response.data?.availableRestaurants && response.data.availableRestaurants.length > 1) {
+
+                // Guardamos token temporal y restaurantes en el store
                 setAuthData(response.data);
-                navigate("/select-restaurant", {
-                    state: {
-                        credentials: data,
-                        availableRestaurants: response.data.availableRestaurants,
-                    }
-                });
+
+                navigate("/select-restaurant"); // redirigimos sin pasar state
             } else {
+                // 2️ Usuario con 1 restaurante → login completo
                 setAuthData(response.data);
                 navigate("/dashboard");
             }

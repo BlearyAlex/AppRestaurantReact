@@ -1,57 +1,47 @@
-﻿import { useNavigate, useLocation } from "react-router";
+﻿import {useNavigate} from "react-router";
 import useAuthStore from "@/store/authStore.ts";
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
-import { Button } from "@/components/ui/button.tsx";
+import {useEffect, useState} from "react";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
+import {Button} from "@/components/ui/button.tsx";
 import AuthService from "@/api/authService";
-import type { LoginDto, UserRestaurantResponse } from "@/types/auth";
 
 const authService = new AuthService();
 
 function SelectRestaurant() {
+
     const navigate = useNavigate();
-    const location = useLocation();
 
-    // Datos pasados desde Login.tsx via navigate state
-    const credentials = location.state?.credentials as LoginDto | undefined;
-    // Leemos availableRestaurants del state para no depender del store,
-    // que se sobrescribe al hacer el segundo login con restaurantId.
-    const restaurants = location.state?.availableRestaurants as UserRestaurantResponse[] | undefined;
-
-    const { setAuthData, logout } = useAuthStore();
+    const {accessToken,availableRestaurants, setAuthData, logout} = useAuthStore();
 
     const [loadingId, setLoadingId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // Solo protege al montar: si no hay credenciales o restaurantes, volver al login
-        if (!credentials || !restaurants || restaurants.length === 0) {
-            navigate("/login", { replace: true });
+        // Protege la ruta: si no hay token temporal o restaurantes, volver al login
+        if (!accessToken) {
+            navigate("/login", {replace: true});
         }
-    }, []); // Solo en mount, no reaccionar a cambios del store
+    }, [accessToken, availableRestaurants, navigate]);
 
     const handleSelect = async (restaurantId: string) => {
-        if (!credentials) return;
-
         setLoadingId(restaurantId);
         setError(null);
 
         try {
-            // Re-autenticar con el restaurante seleccionado para obtener el token real
-            const response = await authService.login({
-                ...credentials,
-                restaurantId,
-            });
+            // 🔑 Llamada al endpoint select-restaurant con token temporal
+            const response = await authService.selectRestaurant(restaurantId, accessToken!)
 
             if (!response.data?.accessToken) {
-                setError("No se pudo obtener el token. Intenta de nuevo.");
+                setError("No se pudo obtener el token definitivo. Intenta de nuevo.");
                 return;
             }
 
+            // Guardamos token real y restaurante seleccionado en el store
             setAuthData(response.data);
-            navigate("/dashboard", { replace: true });
-        } catch {
-            setError("Error al seleccionar el restaurante. Intenta de nuevo.");
+
+            navigate("/dashboard", {replace: true});
+        } catch(err: any) {
+            setError(err.response?.data?.message ||"Error al seleccionar el restaurante. Intenta de nuevo.");
         } finally {
             setLoadingId(null);
         }
@@ -59,7 +49,7 @@ function SelectRestaurant() {
 
     const handleCancel = () => {
         logout();
-        navigate("/login", { replace: true });
+        navigate("/login", {replace: true});
     };
 
     return (
@@ -81,7 +71,7 @@ function SelectRestaurant() {
                         <p className="text-sm text-red-600 text-center">{error}</p>
                     )}
 
-                    {restaurants?.map((restaurant) => (
+                    {availableRestaurants?.map((restaurant) => (
                         <div
                             key={restaurant.restaurantId}
                             className="flex justify-between items-center border rounded-lg p-4 hover:bg-muted transition"
