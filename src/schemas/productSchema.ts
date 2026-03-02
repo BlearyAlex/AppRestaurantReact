@@ -8,7 +8,10 @@ const optionalString = z.preprocess(
 
 export const createProductSchema = z.object({
     name: z.string().min(1, "El nombre es requerido").max(100, "Máximo 100 caracteres"),
-    description: z.string().min(1, "La descripción es requerida").max(1000, "Máximo 1000 caracteres"),
+    description: z.preprocess(
+        (val) => (val === "" || val === null || val === undefined ? undefined : val),
+        z.string().max(1000, "Máximo 1000 caracteres").optional()
+    ),
     imageUrl: optionalString,
     imageFile: z
         .any()
@@ -24,21 +27,22 @@ export const createProductSchema = z.object({
             }
         ),
     price: z.number().min(0, "El precio es requerido").max(1000000, "Máximo 1000000"),
+    isEnabled: z.boolean().default(true),
     isActive: z.boolean().default(true),
-    area: z.enum(["kitchen", "bar"]).refine(val => ["kitchen", "bar"].includes(val), {
-        message: "El area es requerida",
-    }),
+    area: z.enum(["kitchen", "bar"], { message: "El área es requerida" }),
     hasStock: z.boolean().default(false),
     stockQuantity: z.preprocess(
         (val) => (val === null || val === undefined ? undefined : val),
         z.number().min(0, "El stock debe ser mayor o igual a 0").max(1000000, "Máximo 1000000").optional()
     ),
-    unit: z.number().min(0, "La unidad es requerida").max(1000000, "Máximo 1000000"),
+    unit: z.preprocess(
+        (val) => (val === null || val === undefined ? undefined : val),
+        z.number().min(0, "La unidad debe ser mayor o igual a 0").max(1000000, "Máximo 1000000").optional()
+    ),
     unitOfMeasure: z.preprocess(
         (val) => (val === "" || val === null || val === undefined ? undefined : val),
         z.enum(["unit", "gram", "milliliter"]).optional()
     ),
-    restaurantId: z.string(),
     categoryId: z.preprocess(
         (val) => (val === null || val === undefined || val === 0 ? undefined : val),
         z.number().int().positive("La categoría es requerida").optional()

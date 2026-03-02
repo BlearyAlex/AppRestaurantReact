@@ -2,79 +2,53 @@ import type { CreateProductDto, UpdateProductDto, ProductResponse } from "@/type
 import api from "./api";
 import type { ApiResponse } from "@/types/api";
 
+const buildFormData = (payload: Record<string, unknown>): FormData => {
+    const formData = new FormData();
+
+    for (const [key, value] of Object.entries(payload)) {
+        if (value === undefined || value === null) continue;
+
+        if (key === "imageFile" && value instanceof File) {
+            formData.append(key, value);
+        } else {
+            formData.append(key, String(value));
+        }
+    }
+
+    return formData;
+};
+
 class ProductService {
     async create(payload: CreateProductDto): Promise<ProductResponse> {
-        try {
-            // Crear un nuevo FormData para enviar datos y archivo
-            const formData = new FormData();
-
-            // Iterar sobre las claves de payload con Object.entries para obtener clave y valor
-            for (const [key, value] of Object.entries(payload)) {
-                if (value) {
-                    // Si es el campo de archivo, agregamos la imagen
-                    if (key === 'imageFile' && value) {
-                        formData.append(key, value);
-                    } else {
-                        formData.append(key, value);
-                    }
-                }
-            }
-            // Realizar la solicitud POST utilizando FormData (Axios maneja los encabezados automáticamente)
-            const response = await api.post("Product/create", formData);
-            return response.data;
-        } catch (error) {
-            throw error; // Manejo de errores
-        }
+        const formData = buildFormData(payload as Record<string, unknown>);
+        const response = await api.post("Product/create", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
     }
-    
+
     async update(payload: UpdateProductDto): Promise<ProductResponse> {
-        try {
-
-            const formData = new FormData();
-
-            for (const [key, value] of Object.entries(payload)) {
-                if (value) {
-                    if (key === 'imageFile' && value) {
-                        formData.append(key, value);
-                    } else {
-                        formData.append(key, value);
-                    }
-                }
-            }
-
-            const response = await api.put("Product/update", formData);
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        const formData = buildFormData(payload as Record<string, unknown>);
+        const response = await api.put("Product/update", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
     }
-    
+
     async delete(productId: number): Promise<ProductResponse> {
-        try {
-            const response = await api.delete(`Product/delete/${productId}`);
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        const response = await api.delete(`Product/delete/${productId}`);
+        return response.data;
     }
-    
+
     async getById(productId: number): Promise<ProductResponse> {
-        try {
-            const response = await api.get(`Product/getById/${productId}`);
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        const response = await api.get(`Product/getById/${productId}`);
+        return response.data;
     }
-    
+
     async getAll(): Promise<ApiResponse<ProductResponse[]>> {
-        try {
-            const response = await api.get("Product/all");
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        const response = await api.get("Product/all");
+        return response.data;
     }
 }
 
-export default ProductService
+export default ProductService;

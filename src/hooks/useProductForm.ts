@@ -2,9 +2,11 @@ import { createProductSchema, updateProductSchema, type CreateProductForm, type 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-const useProductForm = (isEdit: boolean, initialValues: any) => {
+type ProductFormValues = CreateProductForm | UpdateProductForm;
+
+const useProductForm = (isEdit: boolean, initialValues: Partial<ProductFormValues>) => {
     const schema = isEdit ? updateProductSchema : createProductSchema;
-    const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<CreateProductForm | UpdateProductForm>({
+    const { register, handleSubmit, setValue, reset, watch, formState: { errors } } = useForm<ProductFormValues>({
         resolver: zodResolver(schema) as any,
         defaultValues: initialValues
     });

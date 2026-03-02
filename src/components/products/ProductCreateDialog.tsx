@@ -1,82 +1,61 @@
 import useProductForm from "@/hooks/useProductForm";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import ProductForm from "./ProductForm";
 import useAuthStore from "@/store/authStore";
-import {useEffect} from "react";
+import type { CreateProductDto } from "@/types/product";
+import type { CreateProductForm } from "@/schemas/productSchema";
+import { areaToEnum, unitOfMeasureToEnum } from "@/utils/productFormMappers";
 
-function ProductCreateDialog({open, onClose, onSubmit, submitting, setSubmitting}: any) {
-    const {selectedRestaurantId} = useAuthStore();
+interface ProductCreateDialogProps {
+    open: boolean;
+    onClose: () => void;
+    onSubmit: (payload: CreateProductDto) => Promise<void>;
+    submitting: boolean;
+    setSubmitting: (value: boolean) => void;
+}
 
-    const {register, handleSubmit, setValue, reset, errors, watch} = useProductForm(false, {
+function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmitting }: ProductCreateDialogProps) {
+    const { selectedRestaurantId } = useAuthStore();
+
+    const { register, handleSubmit, setValue, reset, errors, watch } = useProductForm(false, {
         name: "",
-        description: "",
-        imageUrl: "",
+        description: undefined,
+        imageUrl: undefined,
         price: 0,
+        isEnabled: true,
         isActive: true,
-        area: "",
+        area: undefined,
         hasStock: false,
         stockQuantity: undefined,
-        unit: 0,
-        unitOfMeasure: "",
-        hasPreparationTime: false,
-        preparationTime: "",
-        restaurantId: selectedRestaurantId,
+        unit: undefined,
+        unitOfMeasure: undefined,
         categoryId: undefined,
     });
 
-    // Establecer restaurantId cuando cambie
-    useEffect(() => {
-        if (selectedRestaurantId) {
-            setValue("restaurantId", selectedRestaurantId);
-        }
-    }, [selectedRestaurantId, setValue]);
-
-    // Funciones helper para convertir strings a enums numéricos
-    const areaStringToEnum = (area: string): number => area === "kitchen" ? 0 : 1;
-    const unitOfMeasureStringToEnum = (unit: string): number | null => {
-        switch (unit) {
-            case "unit":
-                return 0;
-            case "gram":
-                return 1;
-            case "milliliter":
-                return 2;
-            default:
-                return null;
-        }
-    };
-
-    const handleFormSubmit = async (values: any) => {
+    const handleFormSubmit = async (values: CreateProductForm) => {
         if (!selectedRestaurantId) {
             console.warn("No se puede crear producto sin restaurante seleccionado");
             return;
         }
 
-        console.log("SUBMIT DEL FORMULARIO DE PRODUCTO:", values);
+        const payload: CreateProductDto = {
+            name: values.name,
+            description: values.description,
+            imageFile: values.imageFile instanceof FileList ? values.imageFile[0] : undefined,
+            price: values.price,
+            isEnabled: values.isEnabled ?? true,
+            isActive: values.isActive ?? true,
+            area: areaToEnum(values.area),
+            hasStock: values.hasStock,
+            stockQuantity: values.hasStock ? values.stockQuantity : undefined,
+            unit: values.unit,
+            unitOfMeasure: unitOfMeasureToEnum(values.unitOfMeasure),
+            categoryId: values.categoryId,
+        };
 
         try {
             setSubmitting(true);
-            console.log("Valores del formulario:", values);
-
-            // Limpiar valores y convertir enums
-            const cleanedValues: any = {
-                name: values.name,
-                description: values.description,
-                imageFile: values.imageFile && values.imageFile[0] ? values.imageFile[0] : undefined,
-                price: values.price,
-                isActive: values.isActive,
-                area: areaStringToEnum(values.area),
-                hasStock: values.hasStock,
-                unit: values.unit,
-                hasPreparationTime: values.hasPreparationTime,
-                restaurantId: selectedRestaurantId,
-                stockQuantity: values.hasStock ? values.stockQuantity : undefined,
-                unitOfMeasure: values.unit > 0 && values.unitOfMeasure ? unitOfMeasureStringToEnum(values.unitOfMeasure) : undefined,
-                categoryId: values.categoryId && values.categoryId > 0 ? values.categoryId : undefined,
-            };
-
-            await onSubmit(cleanedValues);
-
+            await onSubmit(payload);
             onClose();
             reset();
         } catch (error) {
@@ -84,7 +63,7 @@ function ProductCreateDialog({open, onClose, onSubmit, submitting, setSubmitting
         } finally {
             setSubmitting(false);
         }
-    }
+    };
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
@@ -99,14 +78,14 @@ function ProductCreateDialog({open, onClose, onSubmit, submitting, setSubmitting
                     setValue={setValue}
                     errors={errors}
                     watch={watch}
-                    onSubmit={handleFormSubmit}
+                    onSubmit={handleFormSubmit as any}
                     submitting={submitting}
                     onCancel={onClose}
-                    submitText="Guardar Cambios"
+                    submitText="Crear Producto"
                 />
             </DialogContent>
         </Dialog>
-    )
+    );
 }
 
-export default ProductCreateDialog
+export default ProductCreateDialog;

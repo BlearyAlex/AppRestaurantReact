@@ -1,5 +1,5 @@
 import ProductService from "@/api/productService";
-import type { ProductResponse } from "@/types/product";
+import type { CreateProductDto, UpdateProductDto, ProductResponse } from "@/types/product";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -14,37 +14,36 @@ const useProducts = () => {
         try {
             const products = await productService.getAll();
             setData(products.data);
-            setLoading(false);
         } catch (error) {
-            setError(`Error al cargar los productos, ${error}`);
+            setError(`Error al cargar los productos: ${error}`);
         } finally {
             setLoading(false);
         }
     };
 
-    const createProduct = async (product: any) => {
+    const createProduct = async (product: CreateProductDto) => {
         try {
             await toast.promise(productService.create(product), {
                 loading: "Creando producto...",
                 success: "Producto creado.",
-                error: "Error al crear el producto"
+                error: "Error al crear el producto",
             });
             await fetchProducts();
         } catch (error) {
-            setError("No se pudo crear el producto.")
-        } 
+            setError("No se pudo crear el producto.");
+        }
     };
 
-    const updateProduct = async (product: any) => {
+    const updateProduct = async (product: UpdateProductDto) => {
         try {
             await toast.promise(productService.update(product), {
                 loading: "Actualizando producto...",
-                success: "Producto actualizada",
+                success: "Producto actualizado.",
                 error: "Error al actualizar el producto",
             });
-            await fetchProducts(); 
+            await fetchProducts();
         } catch (error) {
-            setError("No se pudo actualizar el producto");
+            setError("No se pudo actualizar el producto.");
         }
     };
 
@@ -52,12 +51,12 @@ const useProducts = () => {
         try {
             await toast.promise(productService.delete(productId), {
                 loading: "Eliminando producto...",
-                success: "Producto eliminada",
+                success: "Producto eliminado.",
                 error: "Error al eliminar el producto",
             });
             await fetchProducts();
         } catch (error) {
-            setError("No se pudo eliminar el producto.")
+            setError("No se pudo eliminar el producto.");
         }
     };
 
@@ -69,7 +68,7 @@ const useProducts = () => {
         createProduct,
         updateProduct,
         deleteProduct,
-    }
+    };
 };
 
 export default useProducts;

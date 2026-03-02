@@ -2,14 +2,15 @@ export interface CreateProductDto {
     name: string;
     description?: string;
     imageFile?: File;
+    imageUrl?: string;
     price: number;
+    isEnabled: boolean;
     isActive: boolean;
     area: AreaEnum;
     hasStock: boolean;
     stockQuantity?: number;
-    unit: number;
-    unitOfMeasure: UnitOfMeasureEnum;
-    restaurantId: number;
+    unit?: number;
+    unitOfMeasure?: UnitOfMeasureEnum;
     categoryId?: number;
 }
 
@@ -41,12 +42,6 @@ export interface ProductResponse {
     category: CategoryResponse;
 }
 
-interface CategoryResponse {
-    categoryId: number;
-    name: string;
-    color: string;
-}
-
 enum AreaEnum {
     Kitchen = 0,
     Bar = 1
@@ -56,4 +51,10 @@ enum UnitOfMeasureEnum {
     Unit = 0,
     Gram = 1,
     Milliliter = 2,
+}
+
+interface CategoryResponse {
+    categoryId: number;
+    name: string;
+    color: string;
 }

@@ -1,33 +1,50 @@
-import {Label} from '../ui/label';
-import {Input} from '../ui/input';
-import {DialogClose, DialogFooter} from '../ui/dialog';
-import {Button} from '../ui/button';
-import {Textarea} from "@/components/ui/textarea"
-import {Switch} from "@/components/ui/switch"
-import {Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue} from '../ui/select';
-import {useEffect} from 'react';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
+import { DialogClose, DialogFooter } from '../ui/dialog';
+import { Button } from '../ui/button';
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
+import { useEffect } from 'react';
 import useCategories from '@/hooks/useCategories';
+import type { UseFormRegister, UseFormHandleSubmit, UseFormSetValue, UseFormWatch, FieldErrors } from 'react-hook-form';
+import type { CreateProductForm, UpdateProductForm } from '@/schemas/productSchema';
+import type { CategoryResponse } from '@/types/category';
+
+type ProductFormValues = CreateProductForm | UpdateProductForm;
+
+interface ProductFormProps {
+    register: UseFormRegister<ProductFormValues>;
+    handleSubmit: UseFormHandleSubmit<ProductFormValues>;
+    errors: FieldErrors<ProductFormValues>;
+    watch: UseFormWatch<ProductFormValues>;
+    setValue: UseFormSetValue<ProductFormValues>;
+    onSubmit: (values: ProductFormValues) => void | Promise<void>;
+    submitting: boolean;
+    onCancel: () => void;
+    submitText: string;
+    categories?: CategoryResponse[];
+}
 
 function ProductForm({
-                         register,
-                         handleSubmit,
-                         errors,
-                         watch,
-                         setValue,
-                         onSubmit,
-                         submitting,
-                         onCancel,
-                         submitText,
-                         categories = [],
-                     }: any) {
+    register,
+    handleSubmit,
+    errors,
+    watch,
+    setValue,
+    onSubmit,
+    submitting,
+    onCancel,
+    submitText,
+    categories = [],
+}: ProductFormProps) {
 
-    // Observar los valores de los switches
     const hasStock = watch("hasStock");
     const unitValue = watch("unit");
-    const hasUnit = unitValue !== undefined && unitValue > 0;
+    const hasUnit = unitValue !== undefined && (unitValue as number) > 0;
 
-    // Cargar categorías si no se proporcionan
-    const {data: categoriesData, fetchCategories} = useCategories();
+    // Cargar categorías si no se proporcionan desde el padre
+    const { data: categoriesData, fetchCategories } = useCategories();
     const availableCategories = categories.length > 0 ? categories : categoriesData;
 
     useEffect(() => {
@@ -35,23 +52,6 @@ function ProductForm({
             fetchCategories();
         }
     }, [categories.length, categoriesData.length, fetchCategories]);
-
-    // -------- HANDLERS --------
-
-    const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = parseFloat(e.target.value) || 0;
-        setValue("price", value, {shouldValidate: true});
-    };
-
-    const handleStockChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = parseFloat(e.target.value) || 0;
-        setValue("stockQuantity", value, {shouldValidate: true});
-    };
-
-    const handleUnitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = parseFloat(e.target.value) || 0;
-        setValue("unit", value, {shouldValidate: true});
-    };
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -61,46 +61,40 @@ function ProductForm({
                 <div>
 
                     {/* IMAGE */}
-                    <div>
-                        <Label htmlFor='imageFile'>Imagen</Label>
+                    <div className="grid gap-3 mb-4">
+                        <Label htmlFor="imageFile">Imagen</Label>
                         <Input
                             id="imageFile"
                             type="file"
                             accept="image/*"
-                            onChange={(e) => {
-                                setValue("imageFile", e.target.files, {shouldValidate: true});
-                            }}
+                            onChange={(e) => setValue("imageFile", e.target.files, { shouldValidate: true })}
                         />
                         {errors.imageFile && (
                             <span className="text-xs text-red-500">
-                                {errors.imageFile.message}
+                                {errors.imageFile.message as string}
                             </span>
                         )}
                     </div>
 
                     {/* NAME */}
-                    <div className="grid gap-4 mb-4">
+                    <div className="grid gap-3 mb-4">
                         <Label htmlFor="name">Nombre</Label>
                         <Input id="name" {...register("name")} />
                         {errors.name && (
-                            <span className="text-xs text-red-500">
-                                {errors.name.message}
-                            </span>
+                            <span className="text-xs text-red-500">{errors.name.message}</span>
                         )}
                     </div>
 
                     {/* DESCRIPTION */}
                     <div className="grid gap-3 mb-4">
-                        <Label htmlFor="description">Descripcion</Label>
+                        <Label htmlFor="description">Descripción</Label>
                         <Textarea
-                            placeholder='Agrega una descripcion.'
+                            placeholder="Agrega una descripción."
                             id="description"
                             {...register("description")}
                         />
                         {errors.description && (
-                            <span className="text-xs text-red-500">
-                                {errors.description.message}
-                            </span>
+                            <span className="text-xs text-red-500">{errors.description.message}</span>
                         )}
                     </div>
 
@@ -109,15 +103,12 @@ function ProductForm({
                         <Label htmlFor="price">Precio</Label>
                         <Input
                             id="price"
-                            type='number'
+                            type="number"
                             step="0.01"
-                            {...register("price", {valueAsNumber: true})}
-                            onChange={handlePriceChange}
+                            {...register("price", { valueAsNumber: true })}
                         />
                         {errors.price && (
-                            <span className="text-xs text-red-500">
-                                {errors.price.message}
-                            </span>
+                            <span className="text-xs text-red-500">{errors.price.message}</span>
                         )}
                     </div>
 
@@ -128,10 +119,8 @@ function ProductForm({
                             id="hasStock"
                             checked={hasStock ?? false}
                             onCheckedChange={(checked) => {
-                                setValue("hasStock", checked, {shouldValidate: true});
-                                if (!checked) {
-                                    setValue("stockQuantity", undefined);
-                                }
+                                setValue("hasStock", checked, { shouldValidate: true });
+                                if (!checked) setValue("stockQuantity", undefined);
                             }}
                         />
                     </div>
@@ -141,15 +130,12 @@ function ProductForm({
                             <Label htmlFor="stockQuantity">Cantidad de Stock</Label>
                             <Input
                                 id="stockQuantity"
-                                type='number'
+                                type="number"
                                 step="1"
-                                {...register("stockQuantity", {valueAsNumber: true})}
-                                onChange={handleStockChange}
+                                {...register("stockQuantity", { valueAsNumber: true })}
                             />
                             {errors.stockQuantity && (
-                                <span className="text-xs text-red-500">
-                                    {errors.stockQuantity.message}
-                                </span>
+                                <span className="text-xs text-red-500">{errors.stockQuantity.message}</span>
                             )}
                         </div>
                     )}
@@ -161,47 +147,41 @@ function ProductForm({
 
                     {/* AREA */}
                     <div className="grid gap-3 mb-4">
-                        <Label htmlFor="area">Area</Label>
+                        <Label htmlFor="area">Área</Label>
                         <Select
                             value={watch("area") || ""}
-                            onValueChange={(value) =>
-                                setValue("area", value, {shouldValidate: true})
-                            }
+                            onValueChange={(value) => setValue("area", value as "kitchen" | "bar", { shouldValidate: true })}
                         >
-                            <SelectTrigger className='w-full'>
-                                <SelectValue placeholder="Selecciona un area"/>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Selecciona un área" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectLabel>Areas</SelectLabel>
-                                    <SelectItem value='kitchen'>Cocina</SelectItem>
-                                    <SelectItem value='bar'>Bar</SelectItem>
+                                    <SelectLabel>Áreas</SelectLabel>
+                                    <SelectItem value="kitchen">Cocina</SelectItem>
+                                    <SelectItem value="bar">Bar</SelectItem>
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
                         {errors.area && (
-                            <span className="text-xs text-red-500">
-                                {errors.area.message}
-                            </span>
+                            <span className="text-xs text-red-500">{errors.area.message}</span>
                         )}
                     </div>
 
                     {/* CATEGORY */}
                     <div className="grid gap-3 mb-4">
-                        <Label htmlFor="categoryId">Categoria</Label>
+                        <Label htmlFor="categoryId">Categoría</Label>
                         <Select
                             value={watch("categoryId")?.toString() || ""}
-                            onValueChange={(value) =>
-                                setValue("categoryId", parseInt(value), {shouldValidate: true})
-                            }
+                            onValueChange={(value) => setValue("categoryId", parseInt(value), { shouldValidate: true })}
                         >
-                            <SelectTrigger className='w-full'>
-                                <SelectValue placeholder="Selecciona una categoria"/>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Selecciona una categoría" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectLabel>Categorias</SelectLabel>
-                                    {availableCategories.map((category: any) => (
+                                    <SelectLabel>Categorías</SelectLabel>
+                                    {availableCategories.map((category) => (
                                         <SelectItem
                                             key={category.categoryId}
                                             value={category.categoryId.toString()}
@@ -213,9 +193,7 @@ function ProductForm({
                             </SelectContent>
                         </Select>
                         {errors.categoryId && (
-                            <span className="text-xs text-red-500">
-                                {errors.categoryId.message}
-                            </span>
+                            <span className="text-xs text-red-500">{errors.categoryId.message}</span>
                         )}
                     </div>
 
@@ -226,10 +204,8 @@ function ProductForm({
                             id="hasUnit"
                             checked={hasUnit}
                             onCheckedChange={(checked) => {
-                                setValue("unit", checked ? 1 : 0, {shouldValidate: true});
-                                if (!checked) {
-                                    setValue("unitOfMeasure", undefined);
-                                }
+                                setValue("unit", checked ? 1 : undefined, { shouldValidate: true });
+                                if (!checked) setValue("unitOfMeasure", undefined);
                             }}
                         />
                     </div>
@@ -242,63 +218,66 @@ function ProductForm({
                                 <Select
                                     value={watch("unitOfMeasure") || ""}
                                     onValueChange={(value) =>
-                                        setValue("unitOfMeasure", value, {shouldValidate: true})
+                                        setValue("unitOfMeasure", value as "unit" | "gram" | "milliliter", { shouldValidate: true })
                                     }
                                 >
-                                    <SelectTrigger className='w-full'>
-                                        <SelectValue placeholder="Selecciona una unidad de medida"/>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Selecciona una unidad de medida" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
                                             <SelectLabel>Unidad de medida</SelectLabel>
-                                            <SelectItem value='unit'>Unidad</SelectItem>
-                                            <SelectItem value='gram'>Gramos</SelectItem>
-                                            <SelectItem value='milliliter'>Mililitros</SelectItem>
+                                            <SelectItem value="unit">Unidad</SelectItem>
+                                            <SelectItem value="gram">Gramos</SelectItem>
+                                            <SelectItem value="milliliter">Mililitros</SelectItem>
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
                                 {errors.unitOfMeasure && (
-                                    <span className="text-xs text-red-500">
-                                        {errors.unitOfMeasure.message}
-                                    </span>
+                                    <span className="text-xs text-red-500">{errors.unitOfMeasure.message}</span>
                                 )}
                             </div>
 
                             {/* UNIT VALUE */}
                             <div className="grid gap-3 mb-4">
-                                <Label htmlFor="unitValue">Cantidad</Label>
+                                <Label htmlFor="unit">Cantidad</Label>
                                 <Input
-                                    id="unitValue"
-                                    type='number'
+                                    id="unit"
+                                    type="number"
                                     step="1"
-                                    {...register("unit", {valueAsNumber: true})}
-                                    onChange={handleUnitChange}
+                                    {...register("unit", { valueAsNumber: true })}
                                 />
                                 {errors.unit && (
-                                    <span className="text-xs text-red-500">
-                                        {errors.unit.message}
-                                    </span>
+                                    <span className="text-xs text-red-500">{errors.unit.message}</span>
                                 )}
                             </div>
                         </>
                     )}
 
                     {/* ACTIVE */}
-                    <div className="grid gap-3">
+                    <div className="grid gap-3 mb-4">
                         <Label htmlFor="isActive">Activo</Label>
                         <Switch
                             id="isActive"
                             checked={watch("isActive") ?? true}
-                            onCheckedChange={(checked) =>
-                                setValue("isActive", checked, {shouldValidate: true})
-                            }
+                            onCheckedChange={(checked) => setValue("isActive", checked, { shouldValidate: true })}
+                        />
+                    </div>
+
+                    {/* ENABLED */}
+                    <div className="grid gap-3">
+                        <Label htmlFor="isEnabled">Habilitado</Label>
+                        <Switch
+                            id="isEnabled"
+                            checked={watch("isEnabled") ?? true}
+                            onCheckedChange={(checked) => setValue("isEnabled", checked, { shouldValidate: true })}
                         />
                     </div>
 
                 </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="mt-4">
                 <DialogClose asChild>
                     <Button type="button" variant="outline" onClick={onCancel}>
                         Cancelar
