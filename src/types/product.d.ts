@@ -1,3 +1,4 @@
+// Request
 export interface CreateProductDto {
     name: string;
     description?: string;
@@ -23,6 +24,18 @@ export interface DeleteProductDto {
     productId: number;
 }
 
+enum AreaEnum {
+    Kitchen = 0,
+    Bar = 1
+}
+
+enum UnitOfMeasureEnum {
+    Unit = 0,
+    Gram = 1,
+    Milliliter = 2,
+}
+
+// Response
 export interface ProductResponse {
     productId: number;
     name: string;
@@ -42,19 +55,13 @@ export interface ProductResponse {
     category: CategoryResponse;
 }
 
-enum AreaEnum {
-    Kitchen = 0,
-    Bar = 1
-}
-
-enum UnitOfMeasureEnum {
-    Unit = 0,
-    Gram = 1,
-    Milliliter = 2,
-}
-
 interface CategoryResponse {
     categoryId: number;
     name: string;
     color: string;
+}
+
+interface RestaurantResponse {
+    restaurantId: string;
+    name: string;
 }

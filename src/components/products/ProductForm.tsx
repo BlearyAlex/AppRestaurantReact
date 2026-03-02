@@ -48,10 +48,10 @@ function ProductForm({
     const availableCategories = categories.length > 0 ? categories : categoriesData;
 
     useEffect(() => {
-        if (categories.length === 0 && categoriesData.length === 0) {
+        if (!categories.length) {
             fetchCategories();
         }
-    }, [categories.length, categoriesData.length, fetchCategories]);
+    }, []);
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>

@@ -34,7 +34,7 @@ function ProductsTable() {
         fetchProducts();
     }, []);
 
-    if (loading) {
+    if (loading && data.length === 0) {
         return <div>
             <Spinner className='size-8 text-primary' />
         </div>;
@@ -71,6 +71,13 @@ function ProductsTable() {
                     </Button>
                 }
             />
+
+            {/* Opcional: indicador sutil de recarga */}
+            {loading && data.length > 0 && (
+                <div className="flex justify-center mt-2">
+                    <Spinner className='size-4 text-primary' />
+                </div>
+            )}
 
             <ProductCreateDialog
                 open={createModal.open}

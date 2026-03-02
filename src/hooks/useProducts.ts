@@ -1,19 +1,26 @@
 import ProductService from "@/api/productService";
-import type { CreateProductDto, UpdateProductDto, ProductResponse } from "@/types/product";
-import { useState } from "react";
-import { toast } from "sonner";
+import type {CreateProductDto, UpdateProductDto} from "@/types/product";
+import {toast} from "sonner";
+import {useProductStore} from "@/store/productStore";
 
 const useProducts = () => {
-    const [data, setData] = useState<ProductResponse[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const {
+        products: data,
+        loading,
+        error,
+        setProducts,
+        setLoading,
+        setError
+    } = useProductStore();
 
     const productService = new ProductService();
 
     const fetchProducts = async () => {
+        setLoading(true);
         try {
             const products = await productService.getAll();
-            setData(products.data);
+            setProducts(products.data);
+            setError(null);
         } catch (error) {
             setError(`Error al cargar los productos: ${error}`);
         } finally {
@@ -23,12 +30,17 @@ const useProducts = () => {
 
     const createProduct = async (product: CreateProductDto) => {
         try {
-            await toast.promise(productService.create(product), {
-                loading: "Creando producto...",
-                success: "Producto creado.",
-                error: "Error al crear el producto",
-            });
-            await fetchProducts();
+            await toast.promise(
+                productService.create(product).then(async (res) => {
+                    await fetchProducts();
+                    return res;
+                }),
+                {
+                    loading: "Creando producto...",
+                    success: "Producto creado.",
+                    error: "Error al crear el producto",
+                }
+            )
         } catch (error) {
             setError("No se pudo crear el producto.");
         }
@@ -36,12 +48,17 @@ const useProducts = () => {
 
     const updateProduct = async (product: UpdateProductDto) => {
         try {
-            await toast.promise(productService.update(product), {
-                loading: "Actualizando producto...",
-                success: "Producto actualizado.",
-                error: "Error al actualizar el producto",
-            });
-            await fetchProducts();
+          await toast.promise(
+              productService.update(product).then(async (res) => {
+                  await fetchProducts();
+                  return res;
+              }),
+              {
+                  loading: "Editando producto...",
+                  success: "Producto creado.",
+                  error: "Error al editar el producto",
+              }
+          )
         } catch (error) {
             setError("No se pudo actualizar el producto.");
         }
@@ -49,12 +66,17 @@ const useProducts = () => {
 
     const deleteProduct = async (productId: number) => {
         try {
-            await toast.promise(productService.delete(productId), {
-                loading: "Eliminando producto...",
-                success: "Producto eliminado.",
-                error: "Error al eliminar el producto",
-            });
-            await fetchProducts();
+            await toast.promise(
+                productService.delete(productId).then(async (res) => {
+                    await fetchProducts();
+                    return res;
+                }),
+                {
+                    loading: "Eliminando producto...",
+                    success: "Producto eliminado.",
+                    error: "Error al eliminar el producto",
+                }
+            )
         } catch (error) {
             setError("No se pudo eliminar el producto.");
         }
