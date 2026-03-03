@@ -9,7 +9,7 @@ function TableCreateDialog({ open, onClose, onSubmit, submitting, setSubmitting 
 
     const { register, handleSubmit, setValue, watch, errors, reset } = useTableForm(false, {
         name: "",
-        restaurantId: selectedRestaurantId || 0,
+        restaurantId: selectedRestaurantId,
     });
 
     useEffect(() => {

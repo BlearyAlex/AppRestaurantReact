@@ -1,127 +1,100 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '../ui/dialog';
 import ProductForm from './ProductForm';
 import useProductForm from '@/hooks/useProductForm';
 import useAuthStore from '@/store/authStore';
-import type { ProductResponse } from '@/types/product';
-import { useEffect } from 'react';
+import type {ProductResponse, UpdateProductDto} from '@/types/product';
+import {useEffect} from 'react';
+import {areaFromEnum, areaToEnum, unitOfMeasureFromEnum, unitOfMeasureToEnum} from "@/utils/productFormMappers.ts";
+import type {UpdateProductForm} from "@/schemas/productSchema.ts";
 
-// Funciones helper para convertir enums
-const areaEnumToString = (area: number): "kitchen" | "bar" => {
-    return area === 0 ? "kitchen" : "bar";
-};
-
-// Función helper para convertir un string de área a su valor numérico correspondiente
-const areaStringToEnum = (area: "kitchen" | "bar"): number => {
-    return area === "kitchen" ? 0 : 1;
-};
-
-const unitOfMeasureEnumToString = (unit: number): "unit" | "gram" | "milliliter" => {
-    switch (unit) {
-        case 0:
-            return "unit";
-        case 1:
-            return "gram";
-        case 2:
-            return "milliliter";
-        default:
-            return "unit";
-    }
-};
-
-const unitOfMeasureStringToEnum = (unit: "unit" | "gram" | "milliliter"): number => {
-    switch (unit) {
-        case "unit":
-            return 0;
-        case "gram":
-            return 1;
-        case "milliliter":
-            return 2;
-        default:
-            return 0;
-    }
-}
-
-function ProductEditDialog({
-    open,
-    onClose,
-    onSubmit,
-    submitting,
-    setSubmitting,
-    productToEdit
-}: {
+interface ProductEditDialogProps {
     open: boolean;
     onClose: () => void;
-    onSubmit: (values: any) => void;
+    onSubmit: (payload: UpdateProductDto) => Promise<void>;
     submitting: boolean;
     setSubmitting: (value: boolean) => void;
     productToEdit: ProductResponse | null;
-}) {
-    const { selectedRestaurantId } = useAuthStore();
+}
 
-    const { register, handleSubmit, setValue, reset, errors, watch } = useProductForm(true, {
+function ProductEditDialog({
+                               open,
+                               onClose,
+                               onSubmit,
+                               submitting,
+                               setSubmitting,
+                               productToEdit
+                           }: ProductEditDialogProps) {
+    const {selectedRestaurantId} = useAuthStore();
+
+    const {register, handleSubmit, setValue, reset, errors, watch} = useProductForm(true, {
         productId: 0,
         name: "",
-        description: "",
-        imageUrl: "",
+        description: undefined,
+        imageUrl: undefined,
         price: 0,
+        isEnabled: true,
         isActive: true,
-        area: "",
+        area: undefined,
         hasStock: false,
-        stockQuantity: 0,
-        unit: 0,
-        unitOfMeasure: "",
-        restaurantId: selectedRestaurantId || 0,
-        categoryId: 0,
+        stockQuantity: undefined,
+        unit: undefined,
+        unitOfMeasure: undefined,
+        categoryId: undefined,
     });
 
-    // Cargar los valores del producto cuando se selecciona para editar
     useEffect(() => {
         if (productToEdit) {
             reset({
                 productId: productToEdit.productId,
-                name: productToEdit.name || "",
-                description: productToEdit.description || "",
-                imageUrl: productToEdit.imageUrl || "",
-                price: productToEdit.price || 0,
+                name: productToEdit.name ?? "",
+                description: productToEdit.description ?? undefined,
+                imageUrl: productToEdit.imageUrl ?? undefined,
+                price: productToEdit.price ?? 0,
                 isActive: productToEdit.isActive ?? true,
-                area: areaEnumToString(productToEdit.area),
+                area: areaFromEnum(productToEdit.area),
                 hasStock: productToEdit.hasStock ?? false,
-                stockQuantity: productToEdit.stockQuantity,
-                unit: productToEdit.unit || 0,
-                unitOfMeasure: unitOfMeasureEnumToString(productToEdit.unitOfMeasure),
-                restaurantId: productToEdit.restaurant?.restaurantId || selectedRestaurantId || 0,
-                categoryId: productToEdit.category?.categoryId,
+                stockQuantity: productToEdit.stockQuantity ?? undefined,
+                unit: productToEdit.unit ?? undefined,
+                unitOfMeasure: unitOfMeasureFromEnum(productToEdit.unitOfMeasure),
+                categoryId: productToEdit.category?.categoryId ?? undefined,
             });
         }
-    }, [productToEdit, reset, selectedRestaurantId]);
+    }, [productToEdit, reset]);
 
-    // Establecer restaurantId cuando cambie
-    useEffect(() => {
-        if (selectedRestaurantId) {
-            setValue("restaurantId", selectedRestaurantId);
-        }
-    }, [selectedRestaurantId, setValue]);
-
-    const handleEditSubmit = async (values: any) => {
-        setSubmitting(true);
-
-        // Convertir valores antes de enviar el formulario
-        values.area = areaStringToEnum(values.area);
-        values.unitOfMeasure = unitOfMeasureStringToEnum(values.unitOfMeasure);
-
-        // --- Lógica para deleteImage ---
-        // Si se selecciona nueva imagen (imageFile tiene archivo), mandamos deleteImage = true
-        values.deleteImage = !!(values.imageFile && values.imageFile[0]);
-        // Si tienes que enviar solo el archivo, extrae el primer valor:
-        if (values.imageFile && values.imageFile[0]) {
-            values.imageFile = values.imageFile[0];
-        } else {
-            values.imageFile = undefined;
+    const handleFormSubmit = async (values: UpdateProductForm) => {
+        if (!selectedRestaurantId) {
+            console.warn("No se puede editar producto sin restaurante seleccionado");
+            return;
         }
 
-        await onSubmit(values);
-        setSubmitting(false);
-        onClose();
+        const imageFile = values.imageFile instanceof FileList ? values.imageFile[0] : undefined;
+
+        const payload: UpdateProductDto = {
+            productId: values.productId,
+            name: values.name,
+            description: values.description,
+            imageFile: imageFile,
+            deleteImage: !imageFile && !values.imageUrl, // ✅ elimina imagen si no hay nueva ni url existente
+            price: values.price,
+            isEnabled: values.isEnabled ?? true,
+            isActive: values.isActive ?? true,
+            area: areaToEnum(values.area),
+            hasStock: values.hasStock,
+            stockQuantity: values.hasStock ? values.stockQuantity : undefined,
+            unit: values.unit,
+            unitOfMeasure: unitOfMeasureToEnum(values.unitOfMeasure),
+            categoryId: values.categoryId,
+        };
+
+        try {
+            setSubmitting(true);
+            await onSubmit(payload);
+            onClose();
+        } catch (error) {
+            console.error("Error al editar producto:", error);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -137,7 +110,7 @@ function ProductEditDialog({
                     setValue={setValue}
                     errors={errors}
                     watch={watch}
-                    onSubmit={handleEditSubmit}
+                    onSubmit={handleFormSubmit as any}
                     submitting={submitting}
                     onCancel={onClose}
                     submitText="Guardar Cambios"

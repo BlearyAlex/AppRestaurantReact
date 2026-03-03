@@ -1,6 +1,3 @@
-import TablesCard from '@/components/tables/TablesCard'
-import TakeOrder from '@/components/orders/TakeOrder'
-
 function Counter() {
     return (
         <div className='px-4 lg:px-6'>
@@ -17,9 +14,9 @@ function Counter() {
                 </div>
             </div>
 
-            <div>
-                <TakeOrder />
-            </div>
+            {/*<div>*/}
+            {/*    <TakeOrder />*/}
+            {/*</div>*/}
         </div>
     )
 }

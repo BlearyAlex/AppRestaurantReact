@@ -63,7 +63,7 @@ function ProductsTable() {
                 })}
                 data={data}
                 filterColumn="name"
-                filterPlaceholder="Buscar Categoria..."
+                filterPlaceholder="Buscar Productos..."
                 toolbarActions={
                     <Button variant="outline" size="sm" onClick={createModal.openModal}>
                         <IconPlus />

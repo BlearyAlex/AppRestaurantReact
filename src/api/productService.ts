@@ -2,7 +2,7 @@ import type { CreateProductDto, UpdateProductDto, ProductResponse } from "@/type
 import api from "./api";
 import type { ApiResponse } from "@/types/api";
 
-const buildFormData = (payload: Record<string, unknown>): FormData => {
+const buildFormData = <T extends object>(payload: T): FormData => {
     const formData = new FormData();
 
     for (const [key, value] of Object.entries(payload)) {
@@ -20,7 +20,7 @@ const buildFormData = (payload: Record<string, unknown>): FormData => {
 
 class ProductService {
     async create(payload: CreateProductDto): Promise<ProductResponse> {
-        const formData = buildFormData(payload as Record<string, unknown>);
+        const formData = buildFormData(payload);
         const response = await api.post("Product/create", formData, {
             headers: { "Content-Type": "multipart/form-data" },
         });
@@ -28,7 +28,7 @@ class ProductService {
     }
 
     async update(payload: UpdateProductDto): Promise<ProductResponse> {
-        const formData = buildFormData(payload as Record<string, unknown>);
+        const formData = buildFormData(payload);
         const response = await api.put("Product/update", formData, {
             headers: { "Content-Type": "multipart/form-data" },
         });
