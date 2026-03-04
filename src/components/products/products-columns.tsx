@@ -22,6 +22,7 @@ const unitOfMeasureEnumMapping: Record<number, string> = {
 
 export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<ProductResponse>[] => [
     {
+        id: "imagen",
         accessorKey: "imageUrl",
         header: "Imagen",
         cell: ({ row }) => {
@@ -39,10 +40,12 @@ export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Prod
         }
     },
     {
+        id: "nombre",
         accessorKey: "name",
         header: "Nombre",
     },
     {
+        id: "precio",
         accessorKey: "price",
         header: "Precio",
         cell: ({ row }) => {
@@ -59,6 +62,7 @@ export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Prod
         }
     },
     {
+        id: "area",
         accessorKey: "area",
         header: "Area",
         cell: ({ row }) => {
@@ -71,10 +75,12 @@ export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Prod
         }
     },
     {
+        id: "categoria",
         accessorKey: "category.name",
         header: "Categoria",
     },
     {
+        id: "unidad de medida",
         accessorKey: "unitOfMeasure",
         header: "Unidad de Medida",
         cell: ({ row }) => {
@@ -86,14 +92,17 @@ export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Prod
         }
     },
     {
+        id: "unidad",
         accessorKey: "unit",
         header: "Unidad",
     },
     {
+        id: "stock",
         accessorKey: "stockQuantity",
         header: "Stock",
     },
     {
+        id: "activo",
         accessorKey: "isActive",
         header: "Activo",
         cell: ({ row }) => {
@@ -106,7 +115,7 @@ export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Prod
         }
     },
     {
-        id: "actions",
+        id: "acciones",
         cell: ({ row }) => (
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>

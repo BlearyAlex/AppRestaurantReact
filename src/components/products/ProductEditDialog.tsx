@@ -3,7 +3,7 @@ import ProductForm from './ProductForm';
 import useProductForm from '@/hooks/useProductForm';
 import useAuthStore from '@/store/authStore';
 import type {ProductResponse, UpdateProductDto} from '@/types/product';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {areaFromEnum, areaToEnum, unitOfMeasureFromEnum, unitOfMeasureToEnum} from "@/utils/productFormMappers.ts";
 import type {UpdateProductForm} from "@/schemas/productSchema.ts";
 
@@ -26,13 +26,14 @@ function ProductEditDialog({
                            }: ProductEditDialogProps) {
     const {selectedRestaurantId} = useAuthStore();
 
+    const [deleteImage, setDeleteImage] = useState(false);
+
     const {register, handleSubmit, setValue, reset, errors, watch} = useProductForm(true, {
         productId: 0,
         name: "",
         description: undefined,
         imageUrl: undefined,
         price: 0,
-        isEnabled: true,
         isActive: true,
         area: undefined,
         hasStock: false,
@@ -44,6 +45,7 @@ function ProductEditDialog({
 
     useEffect(() => {
         if (productToEdit) {
+            setDeleteImage(false);
             reset({
                 productId: productToEdit.productId,
                 name: productToEdit.name ?? "",
@@ -74,9 +76,8 @@ function ProductEditDialog({
             name: values.name,
             description: values.description,
             imageFile: imageFile,
-            deleteImage: !imageFile && !values.imageUrl, // ✅ elimina imagen si no hay nueva ni url existente
+            deleteImage: deleteImage && !imageFile, // ✅ elimina imagen si no hay nueva ni url existente
             price: values.price,
-            isEnabled: values.isEnabled ?? true,
             isActive: values.isActive ?? true,
             area: areaToEnum(values.area),
             hasStock: values.hasStock,
@@ -114,6 +115,12 @@ function ProductEditDialog({
                     submitting={submitting}
                     onCancel={onClose}
                     submitText="Guardar Cambios"
+                    existingImageUrl={
+                        productToEdit?.imageUrl
+                            ? `http://localhost:8080${productToEdit.imageUrl}`
+                            : undefined
+                    }
+                    onDeleteImage={() => setDeleteImage(true)}
                 />
             </DialogContent>
         </Dialog>

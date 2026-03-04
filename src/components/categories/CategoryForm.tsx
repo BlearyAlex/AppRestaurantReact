@@ -1,8 +1,24 @@
-import { Label } from '../ui/label'
-import { Input } from '../ui/input'
+import {Label} from '../ui/label'
+import {Input} from '../ui/input'
 import ColorPicker from '../ui/color-picker'
-import { DialogClose, DialogFooter } from '../ui/dialog'
-import { Button } from '../ui/button'
+import {DialogClose, DialogFooter} from '../ui/dialog'
+import {Button} from '../ui/button'
+import type {FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormSetValue, UseFormWatch} from "react-hook-form";
+import type {CreateCategoryForm, UpdateCategoryForm} from "@/schemas/categorySchemas.ts";
+
+type CategoryFormValues = CreateCategoryForm | UpdateCategoryForm;
+
+interface CategoryFormProps {
+    register: UseFormRegister<CategoryFormValues>;
+    handleSubmit: UseFormHandleSubmit<CategoryFormValues>;
+    errors: FieldErrors<CategoryFormValues>;
+    watch: UseFormWatch<CategoryFormValues>;
+    setValue: UseFormSetValue<CategoryFormValues>;
+    onSubmit: (values: CategoryFormValues) => void | Promise<void>;
+    submitting: boolean;
+    onCancel: () => void;
+    submitText: string;
+}
 
 function CategoryForm({
     register,
@@ -14,7 +30,7 @@ function CategoryForm({
     submitting,
     onCancel,
     submitText,
-}: any) {
+}: CategoryFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid gap-4">

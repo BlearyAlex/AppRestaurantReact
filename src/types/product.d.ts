@@ -5,7 +5,6 @@ export interface CreateProductDto {
     imageFile?: File;
     imageUrl?: string;
     price: number;
-    isEnabled: boolean;
     isActive: boolean;
     area: AreaEnum;
     hasStock: boolean;

@@ -11,7 +11,6 @@ export interface CreateTableDto {
     name: string;
     seats: number;
     location: string;
-    restaurantId: number;
 }
 
 export interface UpdateTableDto extends Partial<CreateTableDto> {

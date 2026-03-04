@@ -27,7 +27,6 @@ export const createProductSchema = z.object({
             }
         ),
     price: z.number().min(0, "El precio es requerido").max(1000000, "Máximo 1000000"),
-    isEnabled: z.boolean().default(true),
     isActive: z.boolean().default(true),
     area: z.enum(["kitchen", "bar"], { message: "El área es requerida" }),
     hasStock: z.boolean().default(false),

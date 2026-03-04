@@ -11,14 +11,12 @@ type Actions = {
 
 export const getCategoryColumns = ({ onEdit, onDelete }: Actions): ColumnDef<CategoryResponse>[] => [
   {
-    accessorKey: "categoryId",
-    header: "ID",
-  },
-  {
+    id: "nombre",
     accessorKey: "name",
     header: "Nombre",
   },
   {
+    id: "color",
     accessorKey: "color",
     header: "Color",
     cell: ({ row }) => (
@@ -31,11 +29,8 @@ export const getCategoryColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Cat
     ),
   },
   {
-    accessorKey: "restaurantId",
-    header: "RestauranteId",
-  },
-  {
-    id: "actions",
+    id: "acciones",
+    header: "Acciones",
     cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

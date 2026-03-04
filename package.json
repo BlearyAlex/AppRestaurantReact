@@ -43,6 +43,7 @@
     "react": "^19.1.1",
     "react-color": "^2.19.3",
     "react-dom": "^19.1.1",
+    "react-dropzone": "^15.0.0",
     "react-hook-form": "^7.71.2",
     "react-router": "^7.9.4",
     "recharts": "2.15.4",

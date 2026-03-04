@@ -1,33 +1,42 @@
 import useTableForm from '@/hooks/useTableForm';
 import useAuthStore from '@/store/authStore'
-import { useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '../ui/dialog';
 import TableForm from './TableForm';
+import type {CreateTableForm} from "@/schemas/tableSchema.ts";
+import type {CreateTableDto} from "@/types/table";
 
-function TableCreateDialog({ open, onClose, onSubmit, submitting, setSubmitting }: any) {
-    const { selectedRestaurantId } = useAuthStore();
+interface TableCreateDialogProps {
+    open: boolean;
+    onClose: () => void;
+    onSubmit: (payload: CreateTableDto) => Promise<void>;
+    submitting: boolean;
+    setSubmitting: (value: boolean) => void;
+}
 
-    const { register, handleSubmit, setValue, watch, errors, reset } = useTableForm(false, {
+function TableCreateDialog({open, onClose, onSubmit, submitting, setSubmitting}: TableCreateDialogProps) {
+    const {selectedRestaurantId} = useAuthStore();
+
+    const {register, handleSubmit, setValue, watch, errors, reset} = useTableForm(false, {
         name: "",
-        restaurantId: selectedRestaurantId,
+        seats: 0,
+        location: "",
     });
 
-    useEffect(() => {
-        if (selectedRestaurantId) {
-            setValue("restaurantId", selectedRestaurantId)
+    const handleFormSubmit = async (values: CreateTableForm) => {
+        if (!selectedRestaurantId) {
+            console.warn("No se puede crear producto sin restaurante seleccionado");
+            return;
         }
-    }, [selectedRestaurantId, setValue]);
 
-    const handleFormSubmit = async (values: any) => {
+        const payload: CreateTableDto = {
+            name: values.name,
+            seats: values.seats,
+            location: values.location
+        }
+
         try {
             setSubmitting(true);
-
-            const cleanedValues: any = {
-                name: values.name,
-                restaurantId: values.restaurantId,
-            }
-
-            await onSubmit(cleanedValues);
+            await onSubmit(payload);
             onClose();
             reset();
         } catch (error) {

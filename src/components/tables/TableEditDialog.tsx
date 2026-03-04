@@ -37,16 +37,9 @@ function TableEditDialog({
                 name: tableToEdit.name,
                 seats: tableToEdit.seats,
                 location: tableToEdit.location,
-                restaurantId: tableToEdit.restaurantId || selectedRestaurantId || 0
             });
         }
     }, [tableToEdit, reset, selectedRestaurantId]);
-
-    useEffect(() => {
-        if (selectedRestaurantId) {
-            setValue("restaurantId", selectedRestaurantId);
-        }
-    }, [selectedRestaurantId, setValue]);
 
     const handleEditSubmit = async (values: any) => {
         setSubmitting(true);

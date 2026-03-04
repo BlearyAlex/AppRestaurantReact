@@ -1,15 +1,16 @@
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
-import { DialogClose, DialogFooter } from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
-import { useEffect } from 'react';
+import {Label} from '../ui/label';
+import {Input} from '../ui/input';
+import {DialogClose, DialogFooter} from '../ui/dialog';
+import {Button} from '../ui/button';
+import {Textarea} from "@/components/ui/textarea";
+import {Switch} from "@/components/ui/switch";
+import {Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue} from '../ui/select';
+import {useEffect} from 'react';
 import useCategories from '@/hooks/useCategories';
-import type { UseFormRegister, UseFormHandleSubmit, UseFormSetValue, UseFormWatch, FieldErrors } from 'react-hook-form';
-import type { CreateProductForm, UpdateProductForm } from '@/schemas/productSchema';
-import type { CategoryResponse } from '@/types/category';
+import type {UseFormRegister, UseFormHandleSubmit, UseFormSetValue, UseFormWatch, FieldErrors} from 'react-hook-form';
+import type {CreateProductForm, UpdateProductForm} from '@/schemas/productSchema';
+import type {CategoryResponse} from '@/types/category';
+import ImageDropzone from "@/components/ImageDropzone.tsx";
 
 type ProductFormValues = CreateProductForm | UpdateProductForm;
 
@@ -24,27 +25,31 @@ interface ProductFormProps {
     onCancel: () => void;
     submitText: string;
     categories?: CategoryResponse[];
+    existingImageUrl?: string;
+    onDeleteImage?: () => void;
 }
 
 function ProductForm({
-    register,
-    handleSubmit,
-    errors,
-    watch,
-    setValue,
-    onSubmit,
-    submitting,
-    onCancel,
-    submitText,
-    categories = [],
-}: ProductFormProps) {
+                         register,
+                         handleSubmit,
+                         errors,
+                         watch,
+                         setValue,
+                         onSubmit,
+                         submitting,
+                         onCancel,
+                         submitText,
+                         categories = [],
+                         existingImageUrl,
+                         onDeleteImage,
+                     }: ProductFormProps) {
 
     const hasStock = watch("hasStock");
     const unitValue = watch("unit");
     const hasUnit = unitValue !== undefined && (unitValue as number) > 0;
 
     // Cargar categorías si no se proporcionan desde el padre
-    const { data: categoriesData, fetchCategories } = useCategories();
+    const {data: categoriesData, fetchCategories} = useCategories();
     const availableCategories = categories.length > 0 ? categories : categoriesData;
 
     useEffect(() => {
@@ -52,6 +57,9 @@ function ProductForm({
             fetchCategories();
         }
     }, []);
+
+    console.log("imageUrl:", watch("imageUrl"));
+    console.log("imageFile:", watch("imageFile"));
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -62,18 +70,23 @@ function ProductForm({
 
                     {/* IMAGE */}
                     <div className="grid gap-3 mb-4">
-                        <Label htmlFor="imageFile">Imagen</Label>
-                        <Input
-                            id="imageFile"
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setValue("imageFile", e.target.files, { shouldValidate: true })}
+                        <Label>Imagen</Label>
+                        <ImageDropzone
+                            existingImageUrl={existingImageUrl}
+                            previewUrl={`http://localhost:8080${watch("imageUrl")}`}
+                            onFileSelected={(file) => {
+                                // Simula un FileList para mantener compatibilidad
+                                if (file) {
+                                    const dt = new DataTransfer();
+                                    dt.items.add(file);
+                                    setValue("imageFile", dt.files, { shouldValidate: true });
+                                } else {
+                                    setValue("imageFile", undefined, { shouldValidate: true });
+                                }
+                            }}
+                            onDeleteExisting={onDeleteImage}
+                            error={errors.imageFile?.message as string | undefined}
                         />
-                        {errors.imageFile && (
-                            <span className="text-xs text-red-500">
-                                {errors.imageFile.message as string}
-                            </span>
-                        )}
                     </div>
 
                     {/* NAME */}
@@ -105,7 +118,7 @@ function ProductForm({
                             id="price"
                             type="number"
                             step="0.01"
-                            {...register("price", { valueAsNumber: true })}
+                            {...register("price", {valueAsNumber: true})}
                         />
                         {errors.price && (
                             <span className="text-xs text-red-500">{errors.price.message}</span>
@@ -119,7 +132,7 @@ function ProductForm({
                             id="hasStock"
                             checked={hasStock ?? false}
                             onCheckedChange={(checked) => {
-                                setValue("hasStock", checked, { shouldValidate: true });
+                                setValue("hasStock", checked, {shouldValidate: true});
                                 if (!checked) setValue("stockQuantity", undefined);
                             }}
                         />
@@ -132,7 +145,7 @@ function ProductForm({
                                 id="stockQuantity"
                                 type="number"
                                 step="1"
-                                {...register("stockQuantity", { valueAsNumber: true })}
+                                {...register("stockQuantity", {valueAsNumber: true})}
                             />
                             {errors.stockQuantity && (
                                 <span className="text-xs text-red-500">{errors.stockQuantity.message}</span>
@@ -150,10 +163,10 @@ function ProductForm({
                         <Label htmlFor="area">Área</Label>
                         <Select
                             value={watch("area") || ""}
-                            onValueChange={(value) => setValue("area", value as "kitchen" | "bar", { shouldValidate: true })}
+                            onValueChange={(value) => setValue("area", value as "kitchen" | "bar", {shouldValidate: true})}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Selecciona un área" />
+                                <SelectValue placeholder="Selecciona un área"/>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
@@ -173,10 +186,10 @@ function ProductForm({
                         <Label htmlFor="categoryId">Categoría</Label>
                         <Select
                             value={watch("categoryId")?.toString() || ""}
-                            onValueChange={(value) => setValue("categoryId", parseInt(value), { shouldValidate: true })}
+                            onValueChange={(value) => setValue("categoryId", parseInt(value), {shouldValidate: true})}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Selecciona una categoría" />
+                                <SelectValue placeholder="Selecciona una categoría"/>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
@@ -204,7 +217,7 @@ function ProductForm({
                             id="hasUnit"
                             checked={hasUnit}
                             onCheckedChange={(checked) => {
-                                setValue("unit", checked ? 1 : undefined, { shouldValidate: true });
+                                setValue("unit", checked ? 1 : undefined, {shouldValidate: true});
                                 if (!checked) setValue("unitOfMeasure", undefined);
                             }}
                         />
@@ -218,11 +231,11 @@ function ProductForm({
                                 <Select
                                     value={watch("unitOfMeasure") || ""}
                                     onValueChange={(value) =>
-                                        setValue("unitOfMeasure", value as "unit" | "gram" | "milliliter", { shouldValidate: true })
+                                        setValue("unitOfMeasure", value as "unit" | "gram" | "milliliter", {shouldValidate: true})
                                     }
                                 >
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Selecciona una unidad de medida" />
+                                        <SelectValue placeholder="Selecciona una unidad de medida"/>
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
@@ -245,7 +258,7 @@ function ProductForm({
                                     id="unit"
                                     type="number"
                                     step="1"
-                                    {...register("unit", { valueAsNumber: true })}
+                                    {...register("unit", {valueAsNumber: true})}
                                 />
                                 {errors.unit && (
                                     <span className="text-xs text-red-500">{errors.unit.message}</span>
@@ -260,20 +273,9 @@ function ProductForm({
                         <Switch
                             id="isActive"
                             checked={watch("isActive") ?? true}
-                            onCheckedChange={(checked) => setValue("isActive", checked, { shouldValidate: true })}
+                            onCheckedChange={(checked) => setValue("isActive", checked, {shouldValidate: true})}
                         />
                     </div>
-
-                    {/* ENABLED */}
-                    <div className="grid gap-3">
-                        <Label htmlFor="isEnabled">Habilitado</Label>
-                        <Switch
-                            id="isEnabled"
-                            checked={watch("isEnabled") ?? true}
-                            onCheckedChange={(checked) => setValue("isEnabled", checked, { shouldValidate: true })}
-                        />
-                    </div>
-
                 </div>
             </div>
 
