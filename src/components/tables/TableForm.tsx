@@ -2,6 +2,21 @@ import { Label } from '../ui/label'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { DialogClose, DialogFooter } from '../ui/dialog'
+import type { CreateTableForm, UpdateTableForm } from '@/schemas/tableSchema'
+import type { FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormSetValue } from 'react-hook-form'
+
+type TableFormValues = CreateTableForm | UpdateTableForm;
+
+interface TableFormProps {
+    register: UseFormRegister<TableFormValues>;
+    handleSubmit: UseFormHandleSubmit<TableFormValues>;
+    errors: FieldErrors<TableFormValues>;
+    setValue: UseFormSetValue<TableFormValues>;
+    onSubmit: (values: TableFormValues) => void | Promise<void>;
+    submitting: boolean;
+    onCancel: () => void;
+    submitText: string;
+}
 
 function TableForm({
     register,
@@ -12,7 +27,7 @@ function TableForm({
     submitting,
     onCancel,
     submitText,
-}: any) {
+}: TableFormProps) {
 
     // Convertir el valor del asiento a número
     const handleSeatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +46,7 @@ function TableForm({
 
                 <Label htmlFor='seats' className='mb-4'>Asientos</Label>
                 <Input
-                    id='seats' 
+                    id='seats'
                     {...register("seats", { valueAsNumber: true })}
                     type='number'
                     onChange={handleSeatChange}

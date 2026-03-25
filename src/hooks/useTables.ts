@@ -1,10 +1,15 @@
+import OrderService from "@/api/orderService";
 import TableService from "@/api/tableService";
-import type { TableResponse } from "@/types/table";
+import type { TableOrderResponse, UpdateProductQuantityDto } from "@/types/order";
+import type { CreateTableDto, TableResponse } from "@/types/table";
 import { useState } from "react";
 import { toast } from "sonner"
 
+const orderService = new OrderService();
+
 const useTables = () => {
     const [data, setData] = useState<TableResponse[]>([]);
+    const [dataOrderByTable, setDataOrderByTable] = useState<TableOrderResponse[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +27,33 @@ const useTables = () => {
         }
     }
 
-    const createTable = async (table: any) => {
+    const updateProductQuantities = async (payload: UpdateProductQuantityDto) => {
+        try {
+            await toast.promise(orderService.updateProductQuantities(payload), {
+                loading: "Actualizando cantidades...",
+                success: async (response) => {
+                    setDataOrderByTable(response.data); // 👈 actualiza directamente
+                    return "Cantidades actualizadas correctamente.";
+                },
+                error: "Error al actualizar las cantidades.",
+            });
+        } catch (error) {
+            setError(`No se pudo actualizar las cantidades. ${error}`);
+        }
+    };
+    const getOrdersByTable = async (tableId: number) => {
+        try {
+            const tableOrders = await tableService.getOrdersByTable(tableId);
+            setDataOrderByTable(tableOrders.data);
+            setLoading(false);
+        } catch (error) {
+            setError(`Error al cargar las mesas: ${error}`)
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const createTable = async (table: CreateTableDto) => {
         try {
             await toast.promise(tableService.create(table), {
                 loading: "Creando mesa...",
@@ -63,9 +94,12 @@ const useTables = () => {
 
     return {
         data,
+        dataOrderByTable,
         loading,
         error,
         fetchTables,
+        updateProductQuantities,
+        getOrdersByTable,
         createTable,
         updateTable,
         deleteTable

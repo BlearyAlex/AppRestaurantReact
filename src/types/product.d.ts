@@ -51,7 +51,7 @@ export interface ProductResponse {
     createdAt: string;
     updatedAt: string;
     restaurant: RestaurantResponse;
-    category: CategoryResponse;
+    category?: CategoryResponse;
 }
 
 interface CategoryResponse {

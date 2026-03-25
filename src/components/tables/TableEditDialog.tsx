@@ -1,9 +1,19 @@
 import useTableForm from '@/hooks/useTableForm';
 import useAuthStore from '@/store/authStore';
-import type { TableResponse } from '@/types/table';
+import type { TableResponse, UpdateTableDto } from '@/types/table';
 import { useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import TableForm from './TableForm';
+import type { UpdateTableForm } from '@/schemas/tableSchema';
+
+interface TableEditDialogProps {
+    open: boolean;
+    onClose: () => void;
+    onSubmit: (payload: UpdateTableDto) => Promise<void>;
+    submitting: boolean;
+    setSubmitting: (value: boolean) => void;
+    tableToEdit: TableResponse | null;
+}
 
 function TableEditDialog({
     open,
@@ -12,22 +22,14 @@ function TableEditDialog({
     submitting,
     setSubmitting,
     tableToEdit
-}: {
-    open: boolean,
-    onClose: () => void,
-    onSubmit: (values: any) => void;
-    submitting: boolean;
-    setSubmitting: (value: boolean) => void;
-    tableToEdit: TableResponse | null;
-}) {
+}: TableEditDialogProps) {
     const { selectedRestaurantId } = useAuthStore();
 
-    const { register, handleSubmit, setValue, reset, errors, watch } = useTableForm(true, {
+    const { register, handleSubmit, setValue, reset, errors } = useTableForm(true, {
         tableId: 0,
         name: "",
         seats: 0,
         location: "",
-        restaurantId: selectedRestaurantId || 0,
     });
 
     useEffect(() => {
@@ -39,14 +41,30 @@ function TableEditDialog({
                 location: tableToEdit.location,
             });
         }
-    }, [tableToEdit, reset, selectedRestaurantId]);
+    }, [tableToEdit, reset]);
 
-    const handleEditSubmit = async (values: any) => {
-        setSubmitting(true);
+    const handleEditSubmit = async (values: UpdateTableForm) => {
+        if (!selectedRestaurantId) {
+            console.warn("No se puede editar producto sin restaurante seleccionado");
+            return;
+        }
 
-        await onSubmit(values);
-        setSubmitting(false);
-        onClose();
+        const payload: UpdateTableDto = {
+            tableId: values.tableId,
+            name: values.name,
+            seats: values.seats,
+            location: values.location,
+        }
+
+        try {
+            setSubmitting(true);
+            await onSubmit(payload);
+            onClose();
+        } catch (error) {
+            console.log(`Error al editar la mesa: ${error}`)
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     return (
@@ -61,8 +79,7 @@ function TableEditDialog({
                     handleSubmit={handleSubmit}
                     setValue={setValue}
                     errors={errors}
-                    watch={watch}
-                    onSubmit={handleEditSubmit}
+                    onSubmit={handleEditSubmit as any}
                     submitting={submitting}
                     onCancel={onClose}
                     submitText="Guardar Cambios"

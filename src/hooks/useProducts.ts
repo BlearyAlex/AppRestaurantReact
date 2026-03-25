@@ -1,7 +1,7 @@
 import ProductService from "@/api/productService";
-import type {CreateProductDto, UpdateProductDto} from "@/types/product";
-import {toast} from "sonner";
-import {useProductStore} from "@/store/productStore";
+import type { CreateProductDto, UpdateProductDto } from "@/types/product";
+import { toast } from "sonner";
+import { useProductStore } from "@/store/productStore";
 
 const useProducts = () => {
     const {
@@ -42,23 +42,23 @@ const useProducts = () => {
                 }
             )
         } catch (error) {
-            setError("No se pudo crear el producto.");
+            setError(`No se pudo crear el producto. ${error}`);
         }
     };
 
     const updateProduct = async (product: UpdateProductDto) => {
         try {
-          await toast.promise(
-              productService.update(product).then(async (res) => {
-                  await fetchProducts();
-                  return res;
-              }),
-              {
-                  loading: "Editando producto...",
-                  success: "Producto creado.",
-                  error: "Error al editar el producto",
-              }
-          )
+            await toast.promise(
+                productService.update(product).then(async (res) => {
+                    await fetchProducts();
+                    return res;
+                }),
+                {
+                    loading: "Editando producto...",
+                    success: "Producto creado.",
+                    error: "Error al editar el producto",
+                }
+            )
         } catch (error) {
             setError("No se pudo actualizar el producto.");
         }

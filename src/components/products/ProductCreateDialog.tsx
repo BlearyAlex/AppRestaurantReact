@@ -76,7 +76,7 @@ function ProductCreateDialog({ open, onClose, onSubmit, submitting, setSubmittin
                     setValue={setValue}
                     errors={errors}
                     watch={watch}
-                    onSubmit={handleFormSubmit as any}
+                    onSubmit={handleFormSubmit}
                     submitting={submitting}
                     onCancel={onClose}
                     submitText="Crear Producto"

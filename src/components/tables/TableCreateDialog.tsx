@@ -1,9 +1,9 @@
 import useTableForm from '@/hooks/useTableForm';
 import useAuthStore from '@/store/authStore'
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import TableForm from './TableForm';
-import type {CreateTableForm} from "@/schemas/tableSchema.ts";
-import type {CreateTableDto} from "@/types/table";
+import type { CreateTableForm } from "@/schemas/tableSchema.ts";
+import type { CreateTableDto } from "@/types/table";
 
 interface TableCreateDialogProps {
     open: boolean;
@@ -13,16 +13,17 @@ interface TableCreateDialogProps {
     setSubmitting: (value: boolean) => void;
 }
 
-function TableCreateDialog({open, onClose, onSubmit, submitting, setSubmitting}: TableCreateDialogProps) {
-    const {selectedRestaurantId} = useAuthStore();
+function TableCreateDialog({ open, onClose, onSubmit, submitting, setSubmitting }: TableCreateDialogProps) {
+    const { selectedRestaurantId } = useAuthStore();
 
-    const {register, handleSubmit, setValue, watch, errors, reset} = useTableForm(false, {
+    const { register, handleSubmit, setValue, errors, reset } = useTableForm(false, {
         name: "",
         seats: 0,
         location: "",
     });
 
     const handleFormSubmit = async (values: CreateTableForm) => {
+        console.log("CLick")
         if (!selectedRestaurantId) {
             console.warn("No se puede crear producto sin restaurante seleccionado");
             return;
@@ -58,7 +59,6 @@ function TableCreateDialog({open, onClose, onSubmit, submitting, setSubmitting}:
                     handleSubmit={handleSubmit}
                     setValue={setValue}
                     errors={errors}
-                    watch={watch}
                     onSubmit={handleFormSubmit}
                     submitting={submitting}
                     onCancel={onClose}

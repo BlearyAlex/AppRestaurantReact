@@ -1,6 +1,7 @@
 // store/useAuthStore.ts
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type {
     AuthResponse,
     UserInfo,
@@ -32,26 +33,15 @@ interface AuthActions {
     isAuthenticated: () => boolean;
 }
 
-const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
+const useAuthStore = create(persist<AuthState & AuthActions>((set, get) => ({
 
     // ESTADO INICIAL
-
-    // Si hay datos guardados en localStorage, los cargamos
-    accessToken: localStorage.getItem("accessToken"),
-    refreshToken: localStorage.getItem("refreshToken"),
-
-    user: localStorage.getItem("user")
-        ? JSON.parse(localStorage.getItem("user")!)
-        : null,
-
-    availableRestaurants: localStorage.getItem("availableRestaurants")
-        ? JSON.parse(localStorage.getItem("availableRestaurants")!)
-        : null,
-
-    selectedRestaurantId: localStorage.getItem("selectedRestaurantId"),
-
-    isTemporaryToken:
-        localStorage.getItem("isTemporaryToken") === "true",
+    accessToken: null,
+    refreshToken: null,
+    user: null,
+    availableRestaurants: null,
+    selectedRestaurantId: null,
+    isTemporaryToken: false,
 
     // ACCIONES
 
@@ -79,31 +69,7 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
             isTemporaryToken: isTemp
         });
 
-        // Persistencia segura
-        localStorage.setItem("accessToken", response.accessToken);
-        localStorage.setItem("refreshToken", response.refreshToken);
-        localStorage.setItem("isTemporaryToken", String(isTemp));
-
-        // Persistimos usuario si existe
-        if (response.user) {
-            localStorage.setItem("user", JSON.stringify(response.user));
-        }
-
-        // Persistimos restaurantes disponibles
-        if (response.availableRestaurants) {
-            localStorage.setItem(
-                "availableRestaurants",
-                JSON.stringify(response.availableRestaurants)
-            );
-        }
-
-        // Persistimos restaurante seleccionado
-        if (selectedRestaurant) {
-            localStorage.setItem(
-                "selectedRestaurantId",
-                selectedRestaurant
-            );
-        }
+        // El middleware de persist se encarga de guardar el estado completo
     },
 
     /**
@@ -122,17 +88,7 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
             isTemporaryToken: false
         });
 
-        localStorage.setItem("accessToken", response.accessToken);
-        localStorage.setItem("refreshToken", response.refreshToken);
-        localStorage.setItem("isTemporaryToken", "false");
-
-        if (response.user) {
-            localStorage.setItem("user", JSON.stringify(response.user));
-        }
-
-        if (selectedRestaurant) {
-            localStorage.setItem("selectedRestaurantId", selectedRestaurant);
-        }
+        // El middleware de persist se encarga de guardar el estado completo
     },
 
     /**
@@ -140,7 +96,6 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
      */
     setToken: (token: string) => {
         set({ accessToken: token });
-        localStorage.setItem("accessToken", token);
     },
 
     /**
@@ -148,7 +103,6 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
      */
     setRefreshToken: (token: string) => {
         set({ refreshToken: token });
-        localStorage.setItem("refreshToken", token);
     },
 
     /**
@@ -156,7 +110,6 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
      */
     setSelectedRestaurant: (restaurantId: string) => {
         set({ selectedRestaurantId: restaurantId });
-        localStorage.setItem("selectedRestaurantId", restaurantId);
     },
 
     /**
@@ -172,12 +125,7 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
             isTemporaryToken: false
         });
 
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("user");
-        localStorage.removeItem("availableRestaurants");
-        localStorage.removeItem("selectedRestaurantId");
-        localStorage.removeItem("isTemporaryToken");
+        // El middleware de persist borrará el storage cuando el estado se vacíe
     },
 
     /**
@@ -186,6 +134,21 @@ const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
     isAuthenticated: () => {
         return !!get().accessToken;
     }
-}));
+}),
+    {
+        name: "auth-storage",
+        onRehydrateStorage: () => (state) => {
+            // borra claves previas para que no aparezcan duplicadas
+            [
+                "accessToken",
+                "refreshToken",
+                "user",
+                "availableRestaurants",
+                "selectedRestaurantId",
+                "isTemporaryToken"
+            ].forEach((k) => localStorage.removeItem(k));
+        }
+    }
+));
 
 export default useAuthStore;

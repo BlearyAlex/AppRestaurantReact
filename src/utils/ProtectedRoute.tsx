@@ -1,17 +1,20 @@
-import {Navigate, Outlet} from 'react-router';
+import { Navigate, Outlet } from 'react-router';
 import useAuthStore from '@/store/authStore';
+import { useSignalRSync } from '@/hooks/useSignalRSync';
 
 interface ProtectedRouteProps {
     requireRestaurant?: boolean;
 }
 
-function ProtectedRoute({requireRestaurant = true}: ProtectedRouteProps) {
+function ProtectedRoute({ requireRestaurant = true }: ProtectedRouteProps) {
 
     const {
         accessToken,
         isTemporaryToken,
         selectedRestaurantId
     } = useAuthStore();
+
+    useSignalRSync();
 
     // ❌ No autenticado
     if (!accessToken) {

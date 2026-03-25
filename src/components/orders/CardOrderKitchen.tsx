@@ -14,12 +14,16 @@ import {
 } from "@/helpers/HelperButtonOrder";
 import OrderService from "@/api/orderService";
 
+const orderService = new OrderService();
+
 interface CardOrderKitchenProps {
     filter: "pending" | "completed";
 }
 
 function CardOrderKitchen({ filter }: CardOrderKitchenProps) {
-    const orders = useKitchenOrdersStore((state) => state.orders);
+
+    const orders = useKitchenOrdersStore((s) => s.orders);
+    const isLoading = useKitchenOrdersStore((s) => s.isLoading);
 
     const sortedOrders = [...orders].sort((a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -32,8 +36,6 @@ function CardOrderKitchen({ filter }: CardOrderKitchenProps) {
             return order.kitchenStatus !== OrderStatus.READY && order.kitchenStatus !== OrderStatus.DELIVERED;
         }
     })
-
-    const orderService = new OrderService();
 
     const handleAdvanceStatus = async (orderId: number, currentStatus: OrderStatus) => {
         console.log("Click en avanzar", orderId, currentStatus);
@@ -51,6 +53,8 @@ function CardOrderKitchen({ filter }: CardOrderKitchenProps) {
             // SignalR will update the local state via onOrderUpdated
         }
     };
+
+    if (isLoading) return <p className="text-center mt-10">Cargando órdenes...</p>;
 
     return (
         <>

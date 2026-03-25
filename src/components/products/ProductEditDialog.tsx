@@ -1,11 +1,11 @@
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import ProductForm from './ProductForm';
 import useProductForm from '@/hooks/useProductForm';
 import useAuthStore from '@/store/authStore';
-import type {ProductResponse, UpdateProductDto} from '@/types/product';
-import {useEffect, useState} from 'react';
-import {areaFromEnum, areaToEnum, unitOfMeasureFromEnum, unitOfMeasureToEnum} from "@/utils/productFormMappers.ts";
-import type {UpdateProductForm} from "@/schemas/productSchema.ts";
+import type { ProductResponse, UpdateProductDto } from '@/types/product';
+import { useEffect, useState } from 'react';
+import { areaFromEnum, areaToEnum, unitOfMeasureFromEnum, unitOfMeasureToEnum } from "@/utils/productFormMappers.ts";
+import type { UpdateProductForm } from "@/schemas/productSchema.ts";
 
 interface ProductEditDialogProps {
     open: boolean;
@@ -17,18 +17,18 @@ interface ProductEditDialogProps {
 }
 
 function ProductEditDialog({
-                               open,
-                               onClose,
-                               onSubmit,
-                               submitting,
-                               setSubmitting,
-                               productToEdit
-                           }: ProductEditDialogProps) {
-    const {selectedRestaurantId} = useAuthStore();
+    open,
+    onClose,
+    onSubmit,
+    submitting,
+    setSubmitting,
+    productToEdit
+}: ProductEditDialogProps) {
+    const { selectedRestaurantId } = useAuthStore();
 
     const [deleteImage, setDeleteImage] = useState(false);
 
-    const {register, handleSubmit, setValue, reset, errors, watch} = useProductForm(true, {
+    const { register, handleSubmit, setValue, reset, errors, watch } = useProductForm(true, {
         productId: 0,
         name: "",
         description: undefined,

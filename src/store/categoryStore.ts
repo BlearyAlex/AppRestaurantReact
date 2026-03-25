@@ -1,5 +1,5 @@
-import {create} from "zustand";
-import type {CategoryResponse} from "@/types/product";
+import { create } from "zustand";
+import type { CategoryResponse } from "@/types/product";
 
 interface CategoryState {
     categories: CategoryResponse[];
@@ -14,10 +14,7 @@ export const useCategoryStore = create<CategoryState>((set) => ({
     categories: [],
     loading: false,
     error: null,
-    setCategories: (categories: CategoryResponse[]) =>
-        set({ categories }),
-    setLoading: (loading: boolean) =>
-        set({ loading }),
-    setError: (error: string | null) =>
-        set({ error }),
+    setCategories: (categories: CategoryResponse[]) => set({ categories }),
+    setLoading: (loading: boolean) => set({ loading }),
+    setError: (error: string | null) => set({ error }),
 }));

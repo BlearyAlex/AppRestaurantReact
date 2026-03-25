@@ -46,6 +46,22 @@ export interface TableProductResponse {
     location: string;
 }
 
+export interface OrderDetailItemResponse {
+    productId: number;
+    productName: string;
+    imageUrl?: string | null;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+    notes?: string | null;
+}
+
+export interface TableOrderResponse {
+    orderId: number;
+    createdAt: string; // ISO date string
+    products: OrderDetailItemResponse[];
+}
+
 // DTOs para actualizar cantidades - coinciden con backend
 export interface ProductUpdate {
     productId: number;

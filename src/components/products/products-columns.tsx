@@ -22,11 +22,11 @@ const unitOfMeasureEnumMapping: Record<number, string> = {
 
 export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<ProductResponse>[] => [
     {
-        id: "imagen",
+        id: "imageUrl",
         accessorKey: "imageUrl",
         header: "Imagen",
         cell: ({ row }) => {
-            const url = row.getValue("imageUrl") as string;
+            const url = row.original.imageUrl;
             const finalUrl = url
                 ? `http://localhost:8080${url}`
                 : "/placeholder.png";
@@ -35,30 +35,31 @@ export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Prod
                 <img
                     src={finalUrl}
                     alt="Producto"
-                    className="w-12 h-12 object-cover rounded-md border" />
-            )
+                    className="w-12 h-12 object-cover rounded-md border"
+                />
+            );
         }
     },
     {
-        id: "nombre",
+        id: "name",
         accessorKey: "name",
         header: "Nombre",
     },
     {
-        id: "precio",
+        id: "price",
         accessorKey: "price",
         header: "Precio",
         cell: ({ row }) => {
-            const priceValue = row.getValue("price") as number;
-            const formttedPrice = new Intl.NumberFormat("es-Mx", {
-                style: "currency",
-                currency: "MXN",
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-            }).format(priceValue);
+            const price = row.original.price ?? 0;
+
             return (
-                <span className="font-semibold">{formttedPrice}</span>
-            )
+                <span className="font-semibold">
+                    {new Intl.NumberFormat("es-MX", {
+                        style: "currency",
+                        currency: "MXN",
+                    }).format(price)}
+                </span>
+            );
         }
     },
     {
@@ -66,52 +67,64 @@ export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Prod
         accessorKey: "area",
         header: "Area",
         cell: ({ row }) => {
-            const areaValue = row.getValue("area") as number;
+            const areaValue = row.original.area;
             const areaName = areaEnumMapping[areaValue] || "Desconocido";
-            const areaColorClass = areaName === "Cocina" ? "text-yellow-500" : areaName === "Bar" ? "text-blue-500" : "text-gray-500";
+
+            const areaColorClass =
+                areaName === "Cocina"
+                    ? "text-yellow-500"
+                    : areaName === "Bar"
+                        ? "text-blue-500"
+                        : "text-gray-500";
+
             return (
-                <span className={`font-semibold ${areaColorClass}`}>{areaName}</span>
+                <span className={`font-semibold ${areaColorClass}`}>
+                    {areaName}
+                </span>
             );
         }
     },
     {
-        id: "categoria",
-        accessorKey: "category.name",
+        id: "category",
         header: "Categoria",
+        accessorFn: (row) => row.category?.name ?? "Sin categoría",
     },
     {
-        id: "unidad de medida",
+        id: "unitOfMeasure",
         accessorKey: "unitOfMeasure",
         header: "Unidad de Medida",
         cell: ({ row }) => {
-            const unitOfMeasureValue = row.getValue("unitOfMeasure") as number;
-            const unitOfMeasureName = unitOfMeasureEnumMapping[unitOfMeasureValue] || "Desconocido";
-            return (
-                <span>{unitOfMeasureName}</span>
-            )
+            const value = row.original.unitOfMeasure;
+            const name = unitOfMeasureEnumMapping[value] || "Desconocido";
+
+            return <span>{name}</span>;
         }
     },
     {
-        id: "unidad",
+        id: "unit",
         accessorKey: "unit",
         header: "Unidad",
     },
     {
-        id: "stock",
+        id: "stockQuantity",
         accessorKey: "stockQuantity",
         header: "Stock",
+        cell: ({ row }) => {
+            return row.original.stockQuantity ?? 0;
+        }
     },
     {
-        id: "activo",
+        id: "isActive",
         accessorKey: "isActive",
         header: "Activo",
         cell: ({ row }) => {
-            const isActive = row.getValue("isActive");
+            const isActive = row.original.isActive;
+
             return (
                 <span className={`font-semibold ${isActive ? "text-green-500" : "text-red-500"}`}>
                     {isActive ? "Activo" : "Inactivo"}
                 </span>
-            )
+            );
         }
     },
     {
@@ -129,9 +142,16 @@ export const getProductColumns = ({ onEdit, onDelete }: Actions): ColumnDef<Prod
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-32">
-                    <DropdownMenuItem onClick={() => onEdit(row.original)}>Editar</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onEdit(row.original)}>
+                        Editar
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" onClick={() => onDelete(row.original)}>Eliminar</DropdownMenuItem>
+                    <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => onDelete(row.original)}
+                    >
+                        Eliminar
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         ),
