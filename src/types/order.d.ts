@@ -21,6 +21,7 @@ export interface OrderResponse {
     updatedAt: string;
     orderType: OrderType;
     kitchenStatus: OrderStatus;
+    discriminator: string;
     ticketNumber: string;
     counterNumber: number;
     deliveryAddress: string;
@@ -42,7 +43,7 @@ export interface OrderProductResponse {
 
 export interface TableProductResponse {
     tableId: number;
-    name: number;
+    name: string;
     location: string;
 }
 

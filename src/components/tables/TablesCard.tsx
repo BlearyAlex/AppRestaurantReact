@@ -13,7 +13,12 @@ import TableDeleteDialog from './TableDeleteDialog';
 import { useOrderStore } from '@/store/orderStore';
 import TableActionsModal from './TableActionsModal';
 
-function TablesCard() {
+type TablesCardProps = {
+    showCreate?: boolean;
+    showActions?: boolean; // editar / eliminar
+};
+
+function TablesCard({ showCreate = true, showActions = true }: TablesCardProps) {
     const [submitting, setSubmitting] = useState(false);
     const [tableToEdit, setTableToEdit] = useState<TableResponse | null>(null);
     const [tableToDelete, setTableToDelete] = useState<TableResponse | null>(null);
@@ -68,12 +73,14 @@ function TablesCard() {
 
     return (
         <>
-            <div className='flex justify-end mb-4'>
-                <Button variant="outline" size="sm" onClick={createModal.openModal}>
-                    <IconPlus />
-                    <span className="hidden lg:inline">Agregar Mesa</span>
-                </Button>
-            </div>
+            {showCreate && (
+                <div className='flex justify-end mb-4'>
+                    <Button variant="outline" size="sm" onClick={createModal.openModal}>
+                        <IconPlus />
+                        <span className="hidden lg:inline">Agregar Mesa</span>
+                    </Button>
+                </div>
+            )}
             <Card>
                 <CardHeader>
                     <CardTitle>Mesas</CardTitle>
@@ -107,10 +114,12 @@ function TablesCard() {
                                             </p>
                                         </div>
 
-                                        <div className='flex gap-4'>
-                                            <Button onClick={() => handleEdit(table)} variant="outline" size="sm">Editar</Button>
-                                            <Button onClick={() => handleDelete(table)} variant="destructive" size="sm">Eliminar</Button>
-                                        </div>
+                                        {showActions && (
+                                            <div className='flex gap-4'>
+                                                <Button onClick={() => handleEdit(table)} variant="outline" size="sm">Editar</Button>
+                                                <Button onClick={() => handleDelete(table)} variant="destructive" size="sm">Eliminar</Button>
+                                            </div>
+                                        )}
                                     </CardContent>
                                 </Card>
                             ))}

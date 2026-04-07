@@ -1,33 +1,23 @@
-import { motion } from "framer-motion";
-import { memo } from "react";
+import {memo} from "react";
 
-export const PulseDot = memo(({ isConnected }: { isConnected: boolean }) => {
+export const PulseDot = memo(({isConnected}: { isConnected: boolean }) => {
+    const colorClass = isConnected ? "bg-green-500 shadow-green-500/50" : "bg-red-500 shadow-red-500/50";
+    const textClass = isConnected ? "text-green-600" : "text-red-600";
+
     return (
-        <div className="flex items-center gap-2 mb-4">
-            <div className="relative flex items-center justify-center w-3 h-3">
-                <motion.span
-                    className={`absolute w-3 h-3 rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"
-                        }`}
-                    initial={false}
-                    animate={{
-                        scale: isConnected ? [1, 2] : 1,
-                        opacity: isConnected ? [0.6, 0] : 0.6,
-                    }}
-                    transition={{
-                        duration: 1.5,
-                        repeat: isConnected ? Infinity : 0,
-                        ease: "linear",
-                    }}
-                />
+        <div className="flex items-center mb-4">
+            <div className="relative flex items-center justify-center ml-auto mr-2">
+                {/* Radar pulsante */}
+                <span className={`absolute h-4 w-4 rounded-full ${colorClass} opacity-50 animate-ping`}
+                      style={{animationDuration: "2s"}}>
 
+                </span>
+                {/* Dot central */}
                 <span
-                    className={`relative w-3 h-3 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"
-                        }`}
-                />
+                    className={`relative inline-flex h-3 w-3 rounded-full ${colorClass}`}></span>
             </div>
-
-            <span className="text-sm text-gray-600">
-                {isConnected ? "Tiempo real activo" : "Desconectado"}
+            <span className={`font-semibold text-sm ${textClass}`}>
+                {isConnected ? "Conectado" : "Desconectado"}
             </span>
         </div>
     );

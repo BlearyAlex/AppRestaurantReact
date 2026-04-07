@@ -16,25 +16,21 @@ import useProducts from "@/hooks/useProducts.ts";
 const formatMXN = (amount: number) =>
     new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount)
 
-// Fallback para productos sin imagen
 const PLACEHOLDER = '/placeholder-product.png'
 
 // ─── Sub-componente: tarjeta de producto ──────────────────────────────────────
 
 interface ProductCardProps {
     product: ProductResponse
-    quantity: number   // 0 = no está en la orden
+    quantity: number
     onAdd: () => void
 }
 
 function ProductCard({ product, quantity, onAdd }: ProductCardProps) {
-    const inOrder = quantity > 0
-
-    // Producto sin stock disponible
+    const inOrder    = quantity > 0
     const outOfStock = product.hasStock && (product.stockQuantity ?? 0) <= 0
-    const inactive = !product.isActive
-
-    const disabled = outOfStock || inactive
+    const inactive   = !product.isActive
+    const disabled   = outOfStock || inactive
 
     return (
         <button
@@ -56,21 +52,16 @@ function ProductCard({ product, quantity, onAdd }: ProductCardProps) {
                         : 'border-border bg-card hover:border-primary/40 hover:shadow-md active:scale-95 cursor-pointer',
             ].join(' ')}
         >
-            {/* Badge de cantidad en orden */}
             {inOrder && !disabled && (
                 <span className="absolute -top-2 -right-2 z-10 min-w-[22px] h-[22px] flex items-center justify-center rounded-full bg-primary text-white text-[11px] font-semibold px-1.5 shadow">
                     ×{quantity}
                 </span>
             )}
-
-            {/* Badge de sin stock */}
             {outOfStock && (
                 <span className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-destructive/90 text-white text-[10px] font-medium px-1.5 py-0.5 rounded-md">
                     <PackageX size={10} /> Sin stock
                 </span>
             )}
-
-            {/* Imagen */}
             <div className="w-full aspect-square overflow-hidden rounded-t-xl bg-muted">
                 <img
                     src={product.imageUrl ? `http://localhost:8080/${product.imageUrl}` : PLACEHOLDER}
@@ -80,12 +71,9 @@ function ProductCard({ product, quantity, onAdd }: ProductCardProps) {
                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER }}
                 />
             </div>
-
-            {/* Info */}
             <div className="w-full px-2 py-2">
                 <p className="text-sm font-medium leading-snug line-clamp-2">{product.name}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{formatMXN(product.price)}</p>
-                {/* Stock bajo — aviso sutil */}
                 {product.hasStock && (product.stockQuantity ?? 0) > 0 && (product.stockQuantity ?? 0) <= 5 && (
                     <p className="text-[10px] text-amber-500 font-medium mt-0.5">
                         Quedan {product.stockQuantity}
@@ -116,21 +104,16 @@ function OrderItemRow({ item, onIncrease, onDecrease, onRemove, onNoteChange }: 
     return (
         <div className="flex flex-col gap-1 py-3 border-b border-border last:border-0">
             <div className="flex items-center gap-2">
-                {/* Imagen miniatura */}
                 <img
                     src={item.product.imageUrl ? `http://localhost:8080/${item.product.imageUrl}` : PLACEHOLDER}
                     alt={item.product.name}
                     className="w-10 h-10 rounded-lg object-cover flex-shrink-0 bg-muted"
                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER }}
                 />
-
-                {/* Nombre + categoría */}
                 <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium leading-snug truncate">{item.product.name}</p>
                     <p className="text-[11px] text-muted-foreground">{item.product.category?.name}</p>
                 </div>
-
-                {/* Controles de cantidad */}
                 <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                         type="button"
@@ -150,8 +133,6 @@ function OrderItemRow({ item, onIncrease, onDecrease, onRemove, onNoteChange }: 
                         +
                     </button>
                 </div>
-
-                {/* Precio + eliminar */}
                 <div className="flex items-center gap-1 flex-shrink-0">
                     <span className="text-sm font-semibold text-primary w-16 text-right tabular-nums">
                         {formatMXN(item.product.price * item.quantity)}
@@ -166,10 +147,7 @@ function OrderItemRow({ item, onIncrease, onDecrease, onRemove, onNoteChange }: 
                     </button>
                 </div>
             </div>
-
-            {/* Notas colapsables */}
             <div className="pl-12">
-                {/* Resumen de nota si está cerrada */}
                 {!showNotes && item.notes && (
                     <p className="text-[11px] text-muted-foreground italic truncate mb-0.5">
                         📝 {item.notes}
@@ -202,12 +180,14 @@ function OrderItemRow({ item, onIncrease, onDecrease, onRemove, onNoteChange }: 
 // ─── Componente principal ──────────────────────────────────────────────────────
 
 function TakeOrder({ orderType }: { orderType: OrderType }) {
-    // ✅ Todos los hooks SIEMPRE antes de cualquier return condicional
-    const tableId = useOrderStore((state) => state.tableId)
+    const tableId  = useOrderStore((state) => state.tableId)
+    const takeAway = useOrderStore((state) => state.takeAway)
+    const counter  = useOrderStore((state) => state.counter)
+
     const { data: productsData, fetchProducts } = useProducts()
     const [selectedCategory, setSelectedCategory] = useState('all')
-    const [searchQuery, setSearchQuery] = useState('')
-    const [loading, setLoading] = useState(false)
+    const [searchQuery, setSearchQuery]           = useState('')
+    const [loading, setLoading]                   = useState(false)
 
     const {
         selectedProducts,
@@ -221,21 +201,19 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
         totalPrice,
     } = useSelectedProducts()
 
-    const openModal = useModalState()
+    const openModal    = useModalState()
     const { createOrder } = useOrder()
 
     useEffect(() => {
         if (productsData.length === 0) fetchProducts()
     }, [])
 
-    // Mapa rápido productId → cantidad actual en la orden
     const quantityMap = useMemo(() => {
         const map = new Map<number, number>()
         selectedProducts.forEach((item) => map.set(item.product.productId, item.quantity))
         return map
     }, [selectedProducts])
 
-    // Categorías únicas derivadas de los productos cargados
     const categories = useMemo(() => {
         const map = new Map()
         productsData.forEach((p) => {
@@ -244,7 +222,6 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
         return Array.from(map.values())
     }, [productsData])
 
-    // Productos filtrados por categoría + búsqueda — solo activos
     const filteredProducts = useMemo(() => {
         let result = productsData.filter((p) => p.isActive)
         if (selectedCategory !== 'all') {
@@ -273,21 +250,44 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
                 orderType,
                 products: selectedProducts.map((item) => ({
                     productId: item.product.productId,
-                    quantity: item.quantity,
+                    quantity:  item.quantity,
                     unitPrice: item.product.price,
-                    notes: item.notes,
+                    notes:     item.notes,
                 })),
             }
-            if (orderType === OrderType.ForTable && tableId) order.tableId = tableId
-            console.log(order)
+
+            // ── Campos específicos por tipo de orden ──────────────
+            switch (orderType) {
+                case OrderType.ForTable:
+                    if (tableId) order.tableId = tableId
+                    break
+
+                case OrderType.ForTakeAway:
+                    order.deliveryAddress       = takeAway.deliveryAddress
+                    // order.estimatedDeliveryTime = takeAway.estimatedDeliveryTime || undefined
+                    break
+
+                case OrderType.ForCounter:
+                    order.ticketNumber  = counter.ticketNumber
+                    order.counterNumber = counter.counterNumber ?? undefined
+                    break
+            }
+
             await createOrder(order)
-            clearOrder() // sin args = limpia todo
+            clearOrder()
         } catch (error) {
             console.error(error)
         } finally {
             setLoading(false)
         }
     }
+
+    // ── Label del botón de envío según tipo ───────────────────────
+    const submitLabel = {
+        [OrderType.ForTable]:   <><Send size={15} /> Enviar a cocina</>,
+        [OrderType.ForTakeAway]: <><Send size={15} /> Confirmar pedido</>,
+        [OrderType.ForCounter]:  <><Send size={15} /> Registrar pedido</>,
+    }[orderType]
 
     return (
         <>
@@ -296,8 +296,6 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
 
                     {/* ── Catálogo de productos ── */}
                     <Card className="flex-[60%] p-4">
-
-                        {/* Barra de búsqueda */}
                         <div className="relative mb-3">
                             <Search
                                 size={14}
@@ -322,7 +320,6 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
                             )}
                         </div>
 
-                        {/* Pills de categoría */}
                         <div className="flex flex-wrap gap-2 mb-4">
                             <button
                                 type="button"
@@ -359,7 +356,6 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
                             ))}
                         </div>
 
-                        {/* Grid de productos */}
                         {filteredProducts.length === 0 ? (
                             <div className="py-16 text-center text-sm text-muted-foreground">
                                 {searchQuery
@@ -384,7 +380,6 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
                     <Card className="flex-[40%] p-4 flex flex-col max-h-[620px]">
                         {selectedProducts.length > 0 ? (
                             <>
-                                {/* Encabezado */}
                                 <div className="flex items-center justify-between mb-2">
                                     <h3 className="font-semibold text-sm">Pedido actual</h3>
                                     <span className="bg-primary text-white text-xs font-semibold rounded-full px-2.5 py-0.5">
@@ -392,7 +387,6 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
                                     </span>
                                 </div>
 
-                                {/* Lista scrollable */}
                                 <div className="flex-1 overflow-y-auto min-h-0">
                                     {selectedProducts.map((item) => (
                                         <OrderItemRow
@@ -406,7 +400,6 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
                                     ))}
                                 </div>
 
-                                {/* Total */}
                                 <div className="pt-3 mt-2 border-t border-border">
                                     <div className="flex justify-between items-center">
                                         <span className="font-semibold text-sm">Total</span>
@@ -419,20 +412,13 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
                                     </p>
                                 </div>
 
-                                {/* Botones */}
                                 <div className="mt-3 flex flex-col gap-2">
                                     <Button
                                         type="submit"
                                         className="w-full bg-green-600 hover:bg-green-500 text-white gap-2"
                                         disabled={selectedProducts.length === 0 || loading}
                                     >
-                                        {loading ? (
-                                            'Enviando...'
-                                        ) : orderType === OrderType.ForTable ? (
-                                            <><Send size={15} /> Enviar a cocina</>
-                                        ) : (
-                                            <><Send size={15} /> Proseguir</>
-                                        )}
+                                        {loading ? 'Enviando...' : submitLabel}
                                     </Button>
                                     <Button
                                         type="button"
@@ -445,7 +431,6 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
                                 </div>
                             </>
                         ) : (
-                            /* Estado vacío */
                             <div className="flex-1 flex flex-col items-center justify-center gap-3 py-12 text-center">
                                 <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center text-3xl">
                                     🛒
@@ -472,4 +457,3 @@ function TakeOrder({ orderType }: { orderType: OrderType }) {
 }
 
 export default TakeOrder
-

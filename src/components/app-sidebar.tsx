@@ -42,19 +42,29 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Restaurantes",
+      title: "Administrar Restaurantes",
       url: "/dashboard/restaurants",
       icon: Utensils,
     },
     {
-      title: "Categorias",
+      title: "Administrar Categorias",
       url: "/dashboard/categories",
       icon: LayoutList,
     },
     {
-      title: "Productos",
+      title: "Administrar Productos",
       url: "products",
       icon: Hamburger,
+    },
+    {
+      title: "Administrar Mesas",
+      url: "/dashboard/tables",
+      icon: Sofa
+    },
+    {
+      title: "Ordenes Completadas",
+      url: "/dashboard/orders/waiter",
+      icon: Utensils,
     },
     {
       title: "Pedidos",

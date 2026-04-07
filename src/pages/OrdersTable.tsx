@@ -4,7 +4,7 @@ import {Link} from "react-router";
 import {OrderType} from "@/enums/orderEnum.ts";
 import TakeOrder from "@/components/orders/TakeOrder.tsx";
 
-function Orders() {
+function OrdersTable() {
     const tableId = useOrderStore((state) => state.tableId)
 
     if (!tableId) {
@@ -52,4 +52,4 @@ function Orders() {
     )
 }
 
-export default Orders
+export default OrdersTable
