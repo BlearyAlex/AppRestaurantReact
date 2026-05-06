@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import useAuthStore from "@/store/authStore";
-import { useKitchenOrdersStore } from "@/store/kitchenOrderStore";
+import useAuthStore from "@/features/auth/store/authStore";
+import { useKitchenOrdersStore } from "@/features/orders/store/kitchenOrderStore";
 
 const HUB_URL = import.meta.env.VITE_HUB_URL;
 

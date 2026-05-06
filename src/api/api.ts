@@ -1,5 +1,5 @@
 import axios from 'axios';
-import useAuthStore from '@/store/authStore';
+import useAuthStore from '@/features/auth/store/authStore';
 import { jwtDecode } from "jwt-decode";
 
 const api = axios.create({

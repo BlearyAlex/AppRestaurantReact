@@ -1,26 +1,28 @@
 import { Navigate, Route, Routes } from 'react-router'
-import Auth from './pages/Auth'
+import Auth from './features/auth/pages/Auth'
 import Dashboard from './layout/Dashboard'
 import MainLayout from './layout/MainLayout'
-import Home from './pages/Home'
-import Restaurants from './pages/Restaurants'
-import Categories from './pages/Categories'
-import Products from './pages/Products'
-import Tables from './pages/Tables'
-import { ThemeProvider } from './components/theme-provider'
-import ProtectedRoute from './utils/ProtectedRoute'
-import Login from './pages/Login'
+import Home from './features/restaurant/pages/Home'
+import Restaurants from './features/restaurant/pages/Restaurants'
+import Categories from './features/categories/pages/Categories'
+import Products from './features/products/pages/Products'
+import Tables from './features/tables/pages/Tables'
+import { ThemeProvider } from './components/common/theme-provider'
+import ProtectedRoute from './utils/guards/ProtectedRoute'
+import Login from './features/auth/pages/Login'
 import { Toaster } from './components/ui/sonner'
-import OrdersTakeAway from './pages/OrdersTakeAway.tsx'
-import OrdersCounter from './pages/OrdersCounter.tsx'
-import OrdersTable from './pages/OrdersTable.tsx'
-import ViewAccount from './pages/ViewAccount'
-import Kitchen from './pages/Kitchen'
-import SelectRestaurant from "@/pages/SelectRestaurant.tsx";
-import SelectRestaurantGuard from "@/utils/SelectRestaurantGuard.tsx";
-import TablesOrder from './pages/TablesOrder'
-import WaiterView from "@/pages/WaiterView.tsx";
-import PayPage from "@/pages/PayPage.tsx";
+import OrdersTakeAway from './features/orders/pages/OrdersTakeAway.tsx'
+import OrdersCounter from './features/orders/pages/OrdersCounter.tsx'
+import OrdersTable from './features/orders/pages/OrdersTable.tsx'
+import ViewAccount from './features/restaurant/pages/ViewAccount'
+import Kitchen from './features/orders/pages/Kitchen'
+import SelectRestaurant from "@/features/restaurant/pages/SelectRestaurant.tsx";
+import SelectRestaurantGuard from "@/features/restaurant/components/SelectRestaurantGuard.tsx";
+import TablesOrder from './features/tables/pages/TablesOrder'
+import WaiterView from "@/features/orders/pages/WaiterView.tsx";
+import PayPage from "@/features/payment/pages/PayPage.tsx";
+import CashRegisters from './features/cashRegister/pages/CashRegister.tsx'
+import CashRegisterSession from './features/cashRegister/pages/CashRegisterSession.tsx'
 
 function App() {
     return (
@@ -58,6 +60,8 @@ function App() {
                         <Route path="categories" element={<Categories />} />
                         <Route path="products" element={<Products />} />
                         <Route path='tables' element={<Tables />} />
+                        <Route path='cashRegisterSessions' element={<CashRegisterSession />} />
+                        <Route path='cashRegister' element={<CashRegisters />} />
 
                         <Route path="orders">
                             <Route path="tables" element={<TablesOrder />} />

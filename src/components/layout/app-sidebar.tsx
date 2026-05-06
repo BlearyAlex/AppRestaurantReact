@@ -1,0 +1,219 @@
+import * as React from "react"
+import { Link } from "react-router"
+import {
+  IconCamera,
+  IconDashboard,
+  IconDatabase,
+  IconFileAi,
+  IconFileDescription,
+  IconFileWord,
+  IconHelp,
+  IconInnerShadowTop,
+  IconReport,
+  IconSearch,
+  IconSettings,
+} from "@tabler/icons-react"
+
+import { NavDocuments } from "@/components/layout/nav-documents"
+import { NavMain } from "@/components/layout/nav-main"
+import { NavSecondary } from "@/components/layout/nav-secondary"
+import { NavUser } from "@/components/layout/nav-user"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
+import { Hamburger, LayoutList, NotebookPen, Utensils, Motorbike, Dock, Sofa, CookingPot } from "lucide-react"
+
+const data = {
+  user: {
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  },
+  navMain: [
+    {
+      title: "Dashboard",
+      url: "/dashboard/home",
+      icon: IconDashboard,
+    },
+    {
+      title: "Administrar Restaurantes",
+      url: "/dashboard/restaurants",
+      icon: Utensils,
+    },
+    {
+      title: "Administrar Categorias",
+      url: "/dashboard/categories",
+      icon: LayoutList,
+    },
+    {
+      title: "Administrar Productos",
+      url: "products",
+      icon: Hamburger,
+    },
+    {
+      title: "Administrar Mesas",
+      url: "/dashboard/tables",
+      icon: Sofa
+    },
+    {
+      title: "Cajas Registradoras",
+      url: "cashRegisterSessions",
+      icon: IconFileAi
+    },
+    {
+      title: "Administrar Cajas Registradoras",
+      url: "cashRegister",
+      icon: IconFileAi
+    },
+    {
+      title: "Ordenes Completadas",
+      url: "/dashboard/orders/waiter",
+      icon: Utensils,
+    },
+    {
+      title: "Pedidos",
+      url: "#",
+      icon: NotebookPen,
+      items: [
+        {
+          title: "Mesas",
+          url: "/dashboard/orders/tables",
+          icon: Sofa
+        },
+        {
+          title: "Mostrador",
+          url: "/dashboard/orders/counter",
+          icon: Dock
+        },
+        {
+          title: "Para llevar",
+          url: "/dashboard/orders/delivery",
+          icon: Motorbike
+        },
+      ],
+    },
+    {
+      title: "Cocina",
+      url: "/dashboard/orders/kitchen",
+      icon: CookingPot
+    },
+  ],
+  navClouds: [
+    {
+      title: "Capture",
+      icon: IconCamera,
+      isActive: true,
+      url: "#",
+      items: [
+        {
+          title: "Active Proposals",
+          url: "#",
+        },
+        {
+          title: "Archived",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Proposal",
+      icon: IconFileDescription,
+      url: "#",
+      items: [
+        {
+          title: "Active Proposals",
+          url: "#",
+        },
+        {
+          title: "Archived",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Prompts",
+      icon: IconFileAi,
+      url: "#",
+      items: [
+        {
+          title: "Active Proposals",
+          url: "#",
+        },
+        {
+          title: "Archived",
+          url: "#",
+        },
+      ],
+    },
+  ],
+  navSecondary: [
+    {
+      title: "Settings",
+      url: "#",
+      icon: IconSettings,
+    },
+    {
+      title: "Get Help",
+      url: "#",
+      icon: IconHelp,
+    },
+    {
+      title: "Search",
+      url: "#",
+      icon: IconSearch,
+    },
+  ],
+  documents: [
+    {
+      name: "Data Library",
+      url: "#",
+      icon: IconDatabase,
+    },
+    {
+      name: "Reports",
+      url: "#",
+      icon: IconReport,
+    },
+    {
+      name: "Word Assistant",
+      url: "#",
+      icon: IconFileWord,
+    },
+  ],
+}
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  return (
+    <Sidebar collapsible="offcanvas" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:p-1.5!"
+            >
+              <Link to="/dashboard/home">
+                <IconInnerShadowTop className="size-5!" />
+                <span className="text-base font-semibold">Restaurant App</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={data.navMain} />
+        <NavDocuments items={data.documents} />
+        <NavSecondary items={data.navSecondary} className="mt-auto" />
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={data.user} />
+      </SidebarFooter>
+    </Sidebar>
+  )
+}
