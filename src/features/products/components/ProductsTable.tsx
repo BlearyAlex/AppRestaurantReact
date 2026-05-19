@@ -17,7 +17,6 @@ function ProductsTable() {
     const [productToDelete, setProductToDelete] = useState<ProductResponse | null>(null);
 
     const { data = [], isLoading, error } = useProducts();
-    console.log(data)
 
     const createMutation = useCreateProduct();
     const updateMutation = useUpdateProduct();

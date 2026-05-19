@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { signalRService } from "@/contexts/SignalRService";
 import type { OrderResponse } from "@/features/orders/types/order";
-import OrderService from "@/features/orders/api/orderService";
+import OrderService from "@/features/orders/api/orders.api";
 
 const orderService = new OrderService();
 

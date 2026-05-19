@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BadgeCheck, Receipt, Printer, X, Minus, Plus, Trash2, Save } from 'lucide-react';
 import { useOrderStore } from '../store/orderStore';
-import useTables from '@/features/tables/hooks/useTables';
+import { useTables } from '@/features/tables/hooks/useTables';
 
 interface ViewAccountProps {
     onClose?: () => void;
@@ -13,7 +13,7 @@ function ViewProducts({ onClose }: ViewAccountProps) {
     const tableId = useOrderStore((state) => state.tableId);
 
     // useTables para obtener las órdenes de la mesa
-    const { dataOrderByTable, loading, error: errorTables, getOrdersByTable, updateProductQuantities } = useTables();
+    const { dataOrderByTable, loading, error: errorTables, useOrdersByTable, updateProductQuantities } = useTables();
 
     const [quantityChanges, setQuantityChanges] = useState<Record<string, number>>({});
 

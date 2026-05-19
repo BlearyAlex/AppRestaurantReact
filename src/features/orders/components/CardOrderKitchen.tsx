@@ -1,4 +1,4 @@
-import OrderService from "@/features/orders/api/orderService";
+import OrderService from "@/features/orders/api/orders.api";
 import type { OrderResponse } from "@/features/orders/types/order";
 import { CheckCircle2, CreditCard, RotateCcw, Sofa, Truck } from "lucide-react";
 import { useState, useEffect, useRef, memo } from "react";

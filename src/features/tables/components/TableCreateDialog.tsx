@@ -10,10 +10,9 @@ interface TableCreateDialogProps {
     onClose: () => void;
     onSubmit: (payload: CreateTableDto) => Promise<void>;
     submitting: boolean;
-    setSubmitting: (value: boolean) => void;
 }
 
-function TableCreateDialog({ open, onClose, onSubmit, submitting, setSubmitting }: TableCreateDialogProps) {
+function TableCreateDialog({ open, onClose, onSubmit, submitting }: TableCreateDialogProps) {
     const { selectedRestaurantId } = useAuthStore();
 
     const { register, handleSubmit, setValue, errors, reset } = useTableForm(false, {
@@ -35,14 +34,11 @@ function TableCreateDialog({ open, onClose, onSubmit, submitting, setSubmitting 
         }
 
         try {
-            setSubmitting(true);
             await onSubmit(payload);
             onClose();
             reset();
         } catch (error) {
             console.log(`Error al crear la mesa: ${error}`)
-        } finally {
-            setSubmitting(false);
         }
     }
 

@@ -11,7 +11,6 @@ interface TableEditDialogProps {
     onClose: () => void;
     onSubmit: (payload: UpdateTableDto) => Promise<void>;
     submitting: boolean;
-    setSubmitting: (value: boolean) => void;
     tableToEdit: TableResponse | null;
 }
 
@@ -20,7 +19,6 @@ function TableEditDialog({
     onClose,
     onSubmit,
     submitting,
-    setSubmitting,
     tableToEdit
 }: TableEditDialogProps) {
     const { selectedRestaurantId } = useAuthStore();
@@ -57,13 +55,10 @@ function TableEditDialog({
         }
 
         try {
-            setSubmitting(true);
             await onSubmit(payload);
             onClose();
         } catch (error) {
             console.log(`Error al editar la mesa: ${error}`)
-        } finally {
-            setSubmitting(false);
         }
     }
 

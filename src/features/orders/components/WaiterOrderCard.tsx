@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sofa, CreditCard, Truck, CheckCheck } from "lucide-react";
 import { OrderStatus } from "@/enums/orderEnum";
-import OrderService from "@/features/orders/api/orderService";
+import OrderService from "@/features/orders/api/orders.api";
 import type { OrderResponse } from "@/features/orders/types/order";
 import { toast } from "sonner";
 
